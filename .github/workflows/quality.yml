@@ -1,0 +1,161 @@
+name: Code Quality & Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: semgrep scan --config auto --config p/security-audit --config p/owasp-top-ten --error --json --output semgrep-results.json . || true
+
+      - name: Upload Semgrep results
+        if: always()
+        run: |
+          if [ -f semgrep-results.json ]; then
+            echo "=== Semgrep Results ==="
+            cat semgrep-results.json | python3 -m json.tool 2>/dev/null | head -100
+          fi
+
+      - name: Semgrep strict check
+        run: semgrep scan --config auto --config p/security-audit --error .
+
+  gdscript-lint:
+    name: GDScript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gdtoolkit
+        run: pip install gdtoolkit==4.*
+
+      - name: Run gdlint
+        run: |
+          echo "=== GDScript Linting ==="
+          gdlint src/ || true
+
+      - name: Run gdformat check
+        run: |
+          echo "=== GDScript Format Check ==="
+          gdformat --check src/ 2>&1 || echo "Format differences found (non-blocking)"
+
+  godot-compile:
+    name: Godot Compile Check
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup export templates
+        run: |
+          mkdir -p /root/.local/share/godot/export_templates/4.3.stable
+          mv /root/.local/share/godot/templates/4.3.stable/* /root/.local/share/godot/export_templates/4.3.stable/ || true
+
+      - name: Import project
+        run: godot --headless --import 2>&1 | tee import.log
+
+      - name: Check for script errors
+        run: |
+          if grep -q "Failed to load script" import.log; then
+            echo "::error::Script compilation errors detected"
+            grep "Failed to load script" import.log
+            exit 1
+          fi
+          echo "All scripts compiled successfully"
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        run: |
+          if compgen -G "**/*.sh" > /dev/null 2>&1; then
+            find . -name "*.sh" -exec shellcheck {} +
+          else
+            echo "No shell scripts to check"
+          fi
+
+  json-validate:
+    name: Validate JSON Data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "=== Validating JSON data files ==="
+          ERRORS=0
+          for f in $(find assets/data -name "*.json" 2>/dev/null); do
+            if python3 -m json.tool "$f" > /dev/null 2>&1; then
+              echo "✓ $f"
+            else
+              echo "✗ $f - INVALID JSON"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS JSON files failed validation"
+            exit 1
+          fi
+          echo "All JSON files valid"
+
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install trufflehog
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run TruffleHog
+        run: trufflehog filesystem --directory . --fail --no-update
+
+  license-check:
+    name: License & Metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for required files
+        run: |
+          MISSING=0
+          for f in README.md LICENSE .gitignore project.godot; do
+            if [ -f "$f" ]; then
+              echo "✓ $f exists"
+            else
+              echo "✗ $f MISSING"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          if [ $MISSING -gt 0 ]; then
+            echo "::warning::$MISSING required files missing"
+          fi
+
+      - name: Check project.godot metadata
+        run: |
+          if grep -q 'config/name=' project.godot; then
+            echo "✓ Project name set"
+          else
+            echo "::error::Project name not set in project.godot"
+            exit 1
+          fi
