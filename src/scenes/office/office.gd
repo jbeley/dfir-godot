@@ -5,8 +5,12 @@ extends Node2D
 @onready var player: CharacterBody2D = $Player
 @onready var day_night: CanvasModulate = $DayNightModulate
 @onready var interaction_label: Label = $UI/InteractionLabel
+@onready var notification_label: Label = $UI/NotificationLabel
 
 var current_hotspot: String = ""
+var _hud: Node = null
+var _pause_menu: Control = null
+var _notification_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -16,10 +20,30 @@ func _ready() -> void:
 	_update_day_night(TimeManager.current_hour)
 	_setup_hotspots()
 
+	# Add HUD
+	var hud_scene := load("res://src/scenes/hud/game_hud.tscn") as PackedScene
+	if hud_scene:
+		_hud = hud_scene.instantiate()
+		add_child(_hud)
+
+	# Show case notification if there are active cases
+	if CaseManager.get_active_case_count() > 0:
+		_show_notification("Active case! Press E at desk to investigate.")
+	else:
+		_show_notification("Check your phone for new cases.")
+
+	notification_label.visible = false
+
+
+func _process(delta: float) -> void:
+	if _notification_timer > 0:
+		_notification_timer -= delta
+		if _notification_timer <= 0:
+			notification_label.visible = false
+
 
 func _setup_hotspots() -> void:
-	# Connect all hotspot areas
-	for hotspot in get_tree().get_nodes_in_group("hotspots"):
+	for hotspot: Node in get_tree().get_nodes_in_group("hotspots"):
 		if hotspot is Area2D:
 			hotspot.body_entered.connect(_on_hotspot_entered.bind(hotspot))
 			hotspot.body_exited.connect(_on_hotspot_exited.bind(hotspot))
@@ -43,7 +67,7 @@ func _on_hotspot_exited(body: Node2D, hotspot: Area2D) -> void:
 func _get_hotspot_prompt(hotspot_name: String) -> String:
 	match hotspot_name:
 		"Desk": return "[E] Sit at workstation"
-		"Phone": return "[E] Check phone"
+		"Phone": return "[E] Check email"
 		"EvidenceBoard": return "[E] Evidence board"
 		"Bed": return "[E] Sleep"
 		"Coffee": return "[E] Make coffee"
@@ -62,22 +86,105 @@ func _on_player_interact(target: Node2D) -> void:
 			TimeManager.current_hour = 8
 			TimeManager.current_minute = 0
 			TimeManager._advance_day()
+			_show_notification("Slept well. Energy restored!")
 		"Coffee":
 			ReputationManager.drink_coffee()
+			_show_notification("Coffee! Energy +20")
 		"Cat":
 			ReputationManager.pet_cat()
+			_show_notification("Purrrr... Stress -10")
 		"Phone":
 			GameManager.change_scene("res://src/scenes/email/email_client.tscn")
 
 
+func _show_notification(text: String, duration: float = 3.0) -> void:
+	notification_label.text = text
+	notification_label.visible = true
+	_notification_timer = duration
+
+
 func _update_day_night(_hour: int) -> void:
 	var darkness := TimeManager.get_darkness()
-	var night_color := Color(0.4, 0.4, 0.6)  # Bluish tint at night
+	var night_color := Color(0.4, 0.4, 0.6)
 	var day_color := Color.WHITE
 	day_night.color = day_color.lerp(night_color, darkness)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause_game"):
-		GameManager.change_state(GameManager.GameState.PAUSED)
-		# TODO: Open pause menu
+		if _pause_menu and _pause_menu.visible:
+			_close_pause_menu()
+		else:
+			_open_pause_menu()
+
+
+func _open_pause_menu() -> void:
+	GameManager.change_state(GameManager.GameState.PAUSED)
+	get_tree().paused = true
+
+	if _pause_menu:
+		_pause_menu.visible = true
+		return
+
+	_pause_menu = Control.new()
+	_pause_menu.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	var overlay := ColorRect.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0, 0, 0, 0.6)
+	_pause_menu.add_child(overlay)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_CENTER)
+	vbox.offset_left = -60
+	vbox.offset_top = -50
+	vbox.offset_right = 60
+	vbox.offset_bottom = 50
+	vbox.add_theme_constant_override("separation", 6)
+	_pause_menu.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "PAUSED"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	var resume_btn := Button.new()
+	resume_btn.text = "Resume"
+	resume_btn.pressed.connect(_close_pause_menu)
+	resume_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	vbox.add_child(resume_btn)
+
+	var save_btn := Button.new()
+	save_btn.text = "Save Game"
+	save_btn.pressed.connect(func() -> void:
+		GameManager.save_game()
+		_show_notification("Game saved!")
+		_close_pause_menu()
+	)
+	save_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	vbox.add_child(save_btn)
+
+	var quit_btn := Button.new()
+	quit_btn.text = "Quit to Menu"
+	quit_btn.pressed.connect(func() -> void:
+		get_tree().paused = false
+		GameManager.change_scene("res://src/scenes/main_menu/main_menu.tscn")
+	)
+	quit_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	vbox.add_child(quit_btn)
+
+	var ui_layer := CanvasLayer.new()
+	ui_layer.layer = 100
+	ui_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	ui_layer.add_child(_pause_menu)
+	add_child(ui_layer)
+
+	resume_btn.grab_focus()
+
+
+func _close_pause_menu() -> void:
+	GameManager.change_state(GameManager.GameState.PLAYING)
+	get_tree().paused = false
+	if _pause_menu:
+		_pause_menu.visible = false
