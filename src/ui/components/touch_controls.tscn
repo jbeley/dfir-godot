@@ -1,6 +1,42 @@
-[gd_scene load_steps=2 format=3 uid="uid://touch_controls"]
+[gd_scene load_steps=6 format=3 uid="uid://touch_controls"]
 
 [ext_resource type="Script" path="res://src/ui/components/touch_controls.gd" id="1_touch"]
+
+[sub_resource type="StyleBoxFlat" id="joystick_bg_style"]
+bg_color = Color(0.2, 0.2, 0.25, 0.5)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+
+[sub_resource type="StyleBoxFlat" id="knob_style"]
+bg_color = Color(0.5, 0.5, 0.6, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="btn_style"]
+bg_color = Color(0.2, 0.25, 0.35, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="btn_pressed_style"]
+bg_color = Color(0.3, 0.4, 0.6, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
 
 [node name="TouchControls" type="CanvasLayer"]
 layer = 50
@@ -10,11 +46,12 @@ script = ExtResource("1_touch")
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -80.0
-offset_right = 80.0
-offset_bottom = -16.0
+offset_left = 10.0
+offset_top = -90.0
+offset_right = 90.0
+offset_bottom = -10.0
 mouse_filter = 0
+theme_override_styles/panel = SubResource("joystick_bg_style")
 
 [node name="Knob" type="Panel" parent="JoystickBG"]
 anchors_preset = 8
@@ -22,10 +59,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -10.0
-offset_top = -10.0
-offset_right = 10.0
-offset_bottom = 10.0
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+theme_override_styles/panel = SubResource("knob_style")
 
 [node name="BtnInteract" type="Button" parent="."]
 anchors_preset = 3
@@ -33,18 +71,37 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -70.0
-offset_top = -55.0
-offset_right = -16.0
-offset_bottom = -16.0
-text = "E"
+offset_left = -80.0
+offset_top = -60.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed_style")
+text = "ACT
+[E]"
+
+[node name="BtnBack" type="Button" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -110.0
+offset_right = -10.0
+offset_bottom = -65.0
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed_style")
+text = "BACK"
 
 [node name="BtnPause" type="Button" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -40.0
+offset_left = -50.0
 offset_top = 4.0
 offset_right = -4.0
-offset_bottom = 24.0
-text = "II"
+offset_bottom = 28.0
+theme_override_styles/normal = SubResource("btn_style")
+theme_override_styles/pressed = SubResource("btn_pressed_style")
+text = "MENU"
