@@ -31,6 +31,12 @@ layout_mode = 2
 custom_minimum_size = Vector2(60, 60)
 color = Color(0.5, 0.3, 0.3, 1)
 
+[node name="PortraitSprite" type="Sprite2D" parent="TopSection/PortraitRect"]
+unique_name_in_owner = true
+position = Vector2(30, 30)
+texture_filter = 0
+scale = Vector2(1.8, 1.8)
+
 [node name="PortraitLabel" type="Label" parent="TopSection/PortraitRect"]
 layout_mode = 1
 anchors_preset = 8

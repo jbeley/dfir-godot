@@ -15,11 +15,16 @@ var _notification_timer: float = 0.0
 
 func _ready() -> void:
 	GameManager.change_state(GameManager.GameState.PLAYING)
+	SfxBank.play_music("chill")
 	player.interacted_with.connect(_on_player_interact)
 	TimeManager.hour_changed.connect(_update_day_night)
 	InterruptionManager.interruption_triggered.connect(_on_interruption)
+	TutorialManager.hint_shown.connect(_on_tutorial_hint)
 	_update_day_night(TimeManager.current_hour)
 	_setup_hotspots()
+
+	# Tutorial hint
+	TutorialManager.trigger("office_ready")
 
 	# Add HUD
 	var hud_scene := load("res://src/scenes/hud/game_hud.tscn") as PackedScene
@@ -121,6 +126,10 @@ func _on_interruption(interruption: Dictionary) -> void:
 	SfxBank.play("notification")
 	var text: String = str(interruption.get("text", "Something happened..."))
 	_show_notification(text, 4.0)
+
+
+func _on_tutorial_hint(text: String) -> void:
+	_show_notification(text, 6.0)
 
 
 func _show_notification(text: String, duration: float = 3.0) -> void:

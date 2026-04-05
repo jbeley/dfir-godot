@@ -5,6 +5,7 @@ extends Control
 @onready var dialogue_text: RichTextLabel = %DialogueText
 @onready var choices_container: VBoxContainer = %ChoicesContainer
 @onready var portrait_rect: ColorRect = %PortraitRect
+@onready var portrait_sprite: Sprite2D = %PortraitSprite
 @onready var continue_label: Label = %ContinueLabel
 
 var _dialogue: DialogueManager
@@ -71,19 +72,27 @@ func _load_case_dialogue() -> void:
 	var case_data: CaseData = CaseManager.active_cases[0]
 	_client = case_data.client
 
-	# Set portrait color based on personality
+	# Load portrait based on personality
 	if _client:
+		var portrait_path := ""
 		match _client.personality:
 			ClientData.Personality.PANICKED_CEO:
+				portrait_path = "res://assets/sprites/characters/portraits/panicked_ceo.png"
 				portrait_rect.color = Color(0.6, 0.3, 0.3)
 			ClientData.Personality.LONE_IT_ADMIN:
+				portrait_path = "res://assets/sprites/characters/portraits/it_admin.png"
 				portrait_rect.color = Color(0.3, 0.4, 0.6)
 			ClientData.Personality.HOSTILE_LAWYER:
+				portrait_path = "res://assets/sprites/characters/portraits/hostile_lawyer.png"
 				portrait_rect.color = Color(0.5, 0.3, 0.5)
 			ClientData.Personality.COMPETENT_CISO:
+				portrait_path = "res://assets/sprites/characters/portraits/competent_ciso.png"
 				portrait_rect.color = Color(0.3, 0.5, 0.3)
 			ClientData.Personality.IT_HERO:
+				portrait_path = "res://assets/sprites/characters/portraits/it_hero.png"
 				portrait_rect.color = Color(0.4, 0.4, 0.5)
+		if portrait_path != "" and ResourceLoader.exists(portrait_path):
+			portrait_sprite.texture = load(portrait_path)
 
 	# Load dialogue file
 	var dialogue_path := "res://assets/data/dialogue/panicked_ceo_ransomware.json"
