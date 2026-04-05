@@ -1,0 +1,109 @@
+[gd_scene load_steps=2 format=3 uid="uid://evidence_board"]
+
+[ext_resource type="Script" path="res://src/scenes/evidence_board/evidence_board.gd" id="1_eb"]
+
+[node name="EvidenceBoard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_eb")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.12, 0.1, 0.08, 1)
+
+[node name="HSplit" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -18.0
+
+[node name="BoardPanel" type="Panel" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="CardContainer" type="Control" parent="HSplit/BoardPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="SidePanel" type="VBoxContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+
+[node name="IOCLabel" type="Label" parent="HSplit/SidePanel"]
+layout_mode = 2
+text = "IOCs Found"
+
+[node name="IOCList" type="ItemList" parent="HSplit/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AddIOCRow" type="HBoxContainer" parent="HSplit/SidePanel"]
+layout_mode = 2
+
+[node name="IOCTypeOption" type="OptionButton" parent="HSplit/SidePanel/AddIOCRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="IOCValueInput" type="LineEdit" parent="HSplit/SidePanel/AddIOCRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "IOC value..."
+
+[node name="AddIOCBtn" type="Button" parent="HSplit/SidePanel/AddIOCRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+
+[node name="TechLabel" type="Label" parent="HSplit/SidePanel"]
+layout_mode = 2
+text = "ATT&CK Techniques"
+
+[node name="TechniqueList" type="ItemList" parent="HSplit/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TimelineLabel" type="Label" parent="HSplit/SidePanel"]
+layout_mode = 2
+text = "Timeline"
+
+[node name="TimelineContainer" type="VBoxContainer" parent="HSplit/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+
+[node name="StatusLabel" type="Label" parent="BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Evidence Board"
+
+[node name="BackBtn" type="Button" parent="BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back [ESC]"

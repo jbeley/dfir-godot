@@ -56,7 +56,7 @@ func _on_player_interact(target: Node2D) -> void:
 		"Desk":
 			GameManager.change_scene("res://src/scenes/workstation/workstation.tscn")
 		"EvidenceBoard":
-			pass  # TODO: Evidence board scene
+			GameManager.change_scene("res://src/scenes/evidence_board/evidence_board.tscn")
 		"Bed":
 			ReputationManager.sleep()
 			TimeManager.current_hour = 8

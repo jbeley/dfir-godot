@@ -39,9 +39,10 @@ static func from_dict(data: Dictionary) -> AttackTechnique:
 	tech.tactic = data.get("tactic", "")
 	tech.is_subtechnique = "." in tech.technique_id
 
-	var tactics_data = data.get("tactics", [])
+	var tactics_data: Variant = data.get("tactics", [])
 	if tactics_data is Array:
-		for t in tactics_data:
+		var tactics_array: Array = tactics_data as Array
+		for t: Variant in tactics_array:
 			tech.tactics.append(str(t))
 
 	if tech.is_subtechnique:

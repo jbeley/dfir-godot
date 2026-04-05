@@ -26,8 +26,9 @@ static func from_dict(data: Dictionary) -> CVEEntry:
 	entry.is_kev = data.get("is_kev", false)
 	entry.known_ransomware_use = data.get("knownRansomwareCampaignUse", "Unknown") == "Known"
 
-	var cwes = data.get("cwe_ids", [])
+	var cwes: Variant = data.get("cwe_ids", [])
 	if cwes is Array:
-		for cwe in cwes:
+		var cwes_array: Array = cwes as Array
+		for cwe: Variant in cwes_array:
 			entry.cwe_ids.append(str(cwe))
 	return entry

@@ -19,13 +19,18 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 
-	version_label.text = "v0.1.0 - Phase 1"
+	version_label.text = "v0.2.0 - Phase 2"
 
 	# Auto-focus first button for gamepad
 	new_game_btn.call_deferred("grab_focus")
 
 
 func _on_new_game() -> void:
+	# Load the tutorial case
+	var tutorial_case := SampleCaseLoader.create_tutorial_case()
+	tutorial_case.activate()
+	CaseManager.add_case(tutorial_case)
+
 	GameManager.change_scene("res://src/scenes/office/office.tscn")
 	GameManager.change_state(GameManager.GameState.PLAYING)
 

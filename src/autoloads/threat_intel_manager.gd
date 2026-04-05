@@ -97,7 +97,7 @@ func get_technique(technique_id: String) -> Dictionary:
 
 func get_techniques_by_tactic(tactic: String) -> Array:
 	var results: Array = []
-	for tid in attack_techniques:
+	for tid: String in attack_techniques:
 		var t: Dictionary = attack_techniques[tid]
 		if t.get("tactic", "") == tactic or tactic in t.get("tactics", []):
 			results.append(t)
