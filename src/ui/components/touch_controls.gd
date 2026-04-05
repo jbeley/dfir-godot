@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## On-screen touch controls for mobile/tablet.
 ## Virtual joystick (left) + action buttons (right).
-## Always visible on web builds to support touchscreen laptops and phones.
+## Always visible on web builds.
 
 var _joystick_center := Vector2.ZERO
 var _joystick_touching := false
@@ -17,32 +17,25 @@ func _ready() -> void:
 	layer = 50
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	# Show on mobile, web, or any touch device
 	_is_touch_active = _should_show()
 
-	# Always connect buttons (they're just hidden on desktop)
 	$BtnInteract.pressed.connect(_on_interact)
 	$BtnPause.pressed.connect(_on_pause)
 	$BtnBack.pressed.connect(_on_back)
 
 	_update_visibility()
 
-	# Listen for touch events to auto-show
-	if not _is_touch_active:
-		set_process_input(true)
-
 
 func _should_show() -> bool:
 	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
 		return true
 	if OS.has_feature("web"):
-		# Always show on web - many users on phones/tablets
 		return true
 	return DisplayServer.is_touchscreen_available()
 
 
 func _input(event: InputEvent) -> void:
-	# Auto-show on first touch event
+	# Auto-show on first touch
 	if not _is_touch_active and (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		_is_touch_active = true
 		_update_visibility()
@@ -53,7 +46,6 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch: InputEventScreenTouch = event
 		var vp_size := get_viewport().get_visible_rect().size
-		# Joystick area: left 40% of screen
 		if touch.position.x < vp_size.x * 0.4 and touch.position.y > vp_size.y * 0.4:
 			if touch.pressed:
 				_joystick_touching = true
@@ -68,11 +60,9 @@ func _input(event: InputEvent) -> void:
 			var delta := drag.position - _joystick_center
 			if delta.length() > JOYSTICK_RADIUS:
 				delta = delta.normalized() * JOYSTICK_RADIUS
-
 			_joystick_vector = delta / JOYSTICK_RADIUS
 			if _joystick_vector.length() < JOYSTICK_DEAD_ZONE:
 				_joystick_vector = Vector2.ZERO
-
 			$JoystickBG/Knob.position = $JoystickBG.size / 2.0 - $JoystickBG/Knob.size / 2.0 + delta
 			_update_movement()
 
@@ -113,19 +103,34 @@ func _update_visibility() -> void:
 
 
 func _on_interact() -> void:
-	Input.action_press("interact")
-	await get_tree().create_timer(0.1).timeout
-	Input.action_release("interact")
+	# Directly inject an InputEventAction so it reaches _process polling
+	var ev := InputEventAction.new()
+	ev.action = &"interact"
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	# Release after a frame
+	get_tree().create_timer(0.15).timeout.connect(func() -> void:
+		var rel := InputEventAction.new()
+		rel.action = &"interact"
+		rel.pressed = false
+		Input.parse_input_event(rel)
+	)
 
 
 func _on_pause() -> void:
-	Input.action_press("pause_game")
-	await get_tree().create_timer(0.1).timeout
-	Input.action_release("pause_game")
+	var ev := InputEventAction.new()
+	ev.action = &"pause_game"
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	get_tree().create_timer(0.15).timeout.connect(func() -> void:
+		var rel := InputEventAction.new()
+		rel.action = &"pause_game"
+		rel.pressed = false
+		Input.parse_input_event(rel)
+	)
 
 
 func _on_back() -> void:
-	# Universal back: return to office from any scene
 	var current := get_tree().current_scene
 	if current and current.scene_file_path != "res://src/scenes/office/office.tscn":
 		GameManager.change_scene("res://src/scenes/office/office.tscn")
