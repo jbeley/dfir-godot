@@ -32,10 +32,6 @@ func _ready() -> void:
 		_hud = hud_scene.instantiate()
 		add_child(_hud)
 
-	# Add touch controls for mobile
-	var touch_scene := load("res://src/ui/components/touch_controls.tscn") as PackedScene
-	if touch_scene:
-		add_child(touch_scene.instantiate())
 
 	# Show case notification if there are active cases
 	if CaseManager.get_active_case_count() > 0:
