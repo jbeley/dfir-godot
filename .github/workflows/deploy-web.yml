@@ -24,20 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Godot
+      - name: Debug template locations
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          cp /root/.local/share/godot/templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
-          if [ ! -d /root/.local/share/godot/export_templates/4.3.stable ]; then
-            mkdir -p /root/.local/share/godot/export_templates/4.3.stable
-            cp ~/.local/share/godot/export_templates/4.3.stable/* /root/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
-          fi
-          ls -la /root/.local/share/godot/export_templates/4.3.stable/ || true
-          ls -la ~/.local/share/godot/export_templates/4.3.stable/ || true
+          echo "=== Finding export templates ==="
+          find / -name "web_*" -o -name "webassembly_*" 2>/dev/null | head -20
+          find / -path "*/export_templates/*" -type d 2>/dev/null | head -10
+          echo "=== Godot version ==="
+          godot --version 2>/dev/null || true
 
       - name: Create export presets
+        shell: bash
         run: |
-          cat > export_presets.cfg << 'EOF'
+          cat > export_presets.cfg << 'HEREDOC'
           [preset.0]
 
           name="Web"
@@ -68,49 +66,51 @@ jobs:
           html/focus_canvas_on_start=true
           html/experimental_virtual_keyboard=false
           progressive_web_app/enabled=false
-          progressive_web_app/offline_page=""
-          progressive_web_app/display=1
-          progressive_web_app/orientation=0
-          progressive_web_app/icon_144x144=""
-          progressive_web_app/icon_180x180=""
-          progressive_web_app/icon_512x512=""
-          progressive_web_app/background_color=Color(0.1, 0.1, 0.12, 1)
-          EOF
+          HEREDOC
+          # Strip leading whitespace from heredoc
           sed -i 's/^          //' export_presets.cfg
-          echo "=== export_presets.cfg ==="
-          cat export_presets.cfg
+          echo "=== Generated export_presets.cfg ==="
+          cat -A export_presets.cfg | head -30
 
       - name: Import project
-        run: godot --headless --import 2>&1 || true
+        run: |
+          godot --headless --import 2>&1 | tail -5
+          echo "Import done"
 
-      - name: Export project
+      - name: Export web build
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" build/web/index.html 2>&1
-          echo "=== Build output ==="
-          ls -la build/web/
-
-      - name: Verify export
-        run: |
+          echo "=== Attempting release export ==="
+          godot --headless --export-release "Web" build/web/index.html 2>&1 || true
+          echo "=== Checking build output ==="
+          ls -la build/web/ || true
           if [ ! -f build/web/index.html ]; then
-            echo "::error::Export failed - index.html not found"
-            echo "Trying debug export as fallback..."
+            echo "Release export failed, trying debug export..."
             godot --headless --export-debug "Web" build/web/index.html 2>&1 || true
             ls -la build/web/ || true
           fi
-          test -f build/web/index.html
+          if [ ! -f build/web/index.html ]; then
+            echo "::error::Both export attempts failed"
+            echo "=== Checking for export template issues ==="
+            find / -name "*.wasm" 2>/dev/null | head -5
+            exit 1
+          fi
+          echo "=== Export successful ==="
+          ls -lh build/web/
 
-      - name: Add COOP/COEP headers via service worker
+      - name: Add cross-origin isolation
+        if: success()
         run: |
           cd build/web
-          cat > coi-serviceworker.js << 'SWEOF'
-          if(typeof window==='undefined'){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI SW registered:")).catch(console.error.bind(console,"COI SW failed:"));}
-          SWEOF
-          if [ -f index.html ]; then
-            sed -i 's|<script |<script src="coi-serviceworker.js"></script><script |' index.html
-          fi
+          cat > coi-serviceworker.js << 'EOFSW'
+          if(typeof window==='undefined'){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI SW OK:")).catch(console.error.bind(console,"COI SW fail:"));}
+          EOFSW
+          sed -i 's|<script |<script src="coi-serviceworker.js"></script><script |' index.html
+          echo "=== Final build contents ==="
+          ls -lh .
 
-      - name: Upload artifact
+      - name: Upload pages artifact
+        if: success()
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
