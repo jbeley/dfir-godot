@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://office"]
+[gd_scene load_steps=13 format=3 uid="uid://office"]
 
 [ext_resource type="Script" path="res://src/scenes/office/office.gd" id="1_office"]
 [ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/office/coffee.png" id="6_coffee"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/phone.png" id="7_phone"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/bookshelf.png" id="8_shelf"]
+[ext_resource type="PackedScene" uid="uid://cat_npc" path="res://src/scenes/office/cat_npc.tscn" id="12_cat_npc"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/window.png" id="9_window"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/cat.png" id="10_cat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/rug.png" id="11_rug"]
@@ -101,10 +102,8 @@ position = Vector2(400, 62)
 texture_filter = 0
 texture = ExtResource("7_phone")
 
-[node name="CatSprite" type="Sprite2D" parent="Furniture"]
+[node name="CatNPC" parent="." instance=ExtResource("12_cat_npc")]
 position = Vector2(300, 200)
-texture_filter = 0
-texture = ExtResource("10_cat")
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(240, 160)
@@ -134,12 +133,6 @@ position = Vector2(55, 185)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Coffee"]
 shape = SubResource("shape_coffee")
-
-[node name="Cat" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(300, 200)
-
-[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cat"]
-shape = SubResource("shape_cat")
 
 [node name="Phone" type="Area2D" parent="Hotspots" groups=["hotspots"]]
 position = Vector2(400, 62)

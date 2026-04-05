@@ -82,28 +82,37 @@ func _get_hotspot_prompt(hotspot_name: String) -> String:
 
 
 func _on_player_interact(target: Node2D) -> void:
+	SfxBank.play("interact")
 	match target.name:
 		"Desk":
 			GameManager.change_scene("res://src/scenes/workstation/workstation.tscn")
 		"EvidenceBoard":
 			GameManager.change_scene("res://src/scenes/evidence_board/evidence_board.tscn")
 		"Bed":
+			SfxBank.play("sleep")
 			ReputationManager.sleep()
 			TimeManager.current_hour = 8
 			TimeManager.current_minute = 0
 			TimeManager._advance_day()
 			_show_notification("Slept well. Energy restored!")
 		"Coffee":
+			SfxBank.play("coffee")
 			ReputationManager.drink_coffee()
 			_show_notification("Coffee! Energy +20")
 		"Cat":
+			SfxBank.play("cat_purr")
 			ReputationManager.pet_cat()
 			_show_notification("Purrrr... Stress -10")
+			# Tell cat NPC to play petted animation
+			var cat_node := get_node_or_null("CatNPC")
+			if cat_node and cat_node.has_method("pet"):
+				cat_node.pet()
 		"Phone":
 			GameManager.change_scene("res://src/scenes/email/email_client.tscn")
 
 
 func _on_interruption(interruption: Dictionary) -> void:
+	SfxBank.play("notification")
 	var text: String = str(interruption.get("text", "Something happened..."))
 	_show_notification(text, 4.0)
 

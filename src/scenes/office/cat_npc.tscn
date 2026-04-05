@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://cat_npc"]
+
+[ext_resource type="Script" path="res://src/scenes/office/cat_npc.gd" id="1_cat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/cat_animated.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="shape_cat"]
+radius = 14.0
+
+[node name="CatNPC" type="Node2D" groups=["hotspots"]]
+script = ExtResource("1_cat")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+texture_filter = 0
+hframes = 4
+vframes = 6
+frame = 0
+
+[node name="Cat" type="Area2D" parent="." groups=["hotspots"]]
+
+[node name="Shape" type="CollisionShape2D" parent="Cat"]
+shape = SubResource("shape_cat")
