@@ -1,6 +1,10 @@
 # Godot 4+ specific ignores
 .godot/
 
+# Build output
+build/
+export_presets.cfg
+
 # Godot-specific ignores
 *.translation
 

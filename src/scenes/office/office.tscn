@@ -1,119 +1,169 @@
-[gd_scene load_steps=3 format=3 uid="uid://office"]
+[gd_scene load_steps=12 format=3 uid="uid://office"]
 
 [ext_resource type="Script" path="res://src/scenes/office/office.gd" id="1_office"]
 [ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/desk.png" id="3_desk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/bed.png" id="4_bed"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/evidence_board.png" id="5_board"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/coffee.png" id="6_coffee"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/phone.png" id="7_phone"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/bookshelf.png" id="8_shelf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/window.png" id="9_window"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/cat.png" id="10_cat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/office/rug.png" id="11_rug"]
+
+[sub_resource type="RectangleShape2D" id="shape_desk"]
+size = Vector2(48, 32)
+
+[sub_resource type="RectangleShape2D" id="shape_board"]
+size = Vector2(64, 20)
+
+[sub_resource type="RectangleShape2D" id="shape_bed"]
+size = Vector2(40, 52)
+
+[sub_resource type="RectangleShape2D" id="shape_coffee"]
+size = Vector2(24, 24)
+
+[sub_resource type="CircleShape2D" id="shape_cat"]
+radius = 14.0
+
+[sub_resource type="RectangleShape2D" id="shape_phone"]
+size = Vector2(16, 18)
+
+[sub_resource type="RectangleShape2D" id="shape_hwall"]
+size = Vector2(488, 8)
+
+[sub_resource type="RectangleShape2D" id="shape_vwall"]
+size = Vector2(8, 278)
 
 [node name="Office" type="Node2D"]
 script = ExtResource("1_office")
 
-[node name="BG" type="ColorRect" parent="."]
+[node name="Floor" type="ColorRect" parent="."]
 offset_right = 480.0
 offset_bottom = 270.0
-color = Color(0.15, 0.13, 0.12, 1)
+color = Color(0.22, 0.18, 0.15, 1)
+
+[node name="WallBG" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 45.0
+color = Color(0.3, 0.28, 0.32, 1)
+
+[node name="WallTrim" type="ColorRect" parent="."]
+offset_top = 43.0
+offset_right = 480.0
+offset_bottom = 46.0
+color = Color(0.45, 0.4, 0.35, 1)
+
+[node name="Rug" type="Sprite2D" parent="."]
+position = Vector2(240, 160)
+texture_filter = 0
+texture = ExtResource("11_rug")
+scale = Vector2(2.5, 2.2)
 
 [node name="DayNightModulate" type="CanvasModulate" parent="."]
 color = Color(1, 1, 1, 1)
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(240, 160)
-
 [node name="Furniture" type="Node2D" parent="."]
 
-[node name="DeskSprite" type="Sprite2D" parent="Furniture"]
-position = Vector2(360, 80)
+[node name="Window" type="Sprite2D" parent="Furniture"]
+position = Vector2(155, 22)
 texture_filter = 0
+texture = ExtResource("9_window")
 
-[node name="BedSprite" type="Sprite2D" parent="Furniture"]
-position = Vector2(80, 60)
+[node name="Board" type="Sprite2D" parent="Furniture"]
+position = Vector2(260, 22)
 texture_filter = 0
+texture = ExtResource("5_board")
 
-[node name="CoffeeSprite" type="Sprite2D" parent="Furniture"]
-position = Vector2(60, 180)
+[node name="Bookshelf" type="Sprite2D" parent="Furniture"]
+position = Vector2(440, 30)
 texture_filter = 0
+texture = ExtResource("8_shelf")
 
-[node name="BoardSprite" type="Sprite2D" parent="Furniture"]
-position = Vector2(240, 20)
+[node name="Desk" type="Sprite2D" parent="Furniture"]
+position = Vector2(360, 85)
 texture_filter = 0
+texture = ExtResource("3_desk")
+
+[node name="Bed" type="Sprite2D" parent="Furniture"]
+position = Vector2(70, 70)
+texture_filter = 0
+texture = ExtResource("4_bed")
+
+[node name="Coffee" type="Sprite2D" parent="Furniture"]
+position = Vector2(55, 185)
+texture_filter = 0
+texture = ExtResource("6_coffee")
+
+[node name="Phone" type="Sprite2D" parent="Furniture"]
+position = Vector2(400, 62)
+texture_filter = 0
+texture = ExtResource("7_phone")
+
+[node name="CatSprite" type="Sprite2D" parent="Furniture"]
+position = Vector2(300, 200)
+texture_filter = 0
+texture = ExtResource("10_cat")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(240, 160)
 
 [node name="Hotspots" type="Node2D" parent="."]
 
 [node name="Desk" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(360, 80)
+position = Vector2(360, 85)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
-shape = SubResource("RectangleShape2D_desk")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_desk"]
-size = Vector2(48, 32)
+shape = SubResource("shape_desk")
 
 [node name="EvidenceBoard" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(240, 24)
+position = Vector2(260, 22)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/EvidenceBoard"]
-shape = SubResource("RectangleShape2D_board")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_board"]
-size = Vector2(64, 16)
+shape = SubResource("shape_board")
 
 [node name="Bed" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(80, 60)
+position = Vector2(70, 70)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
-shape = SubResource("RectangleShape2D_bed")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_bed"]
-size = Vector2(40, 48)
+shape = SubResource("shape_bed")
 
 [node name="Coffee" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(60, 180)
+position = Vector2(55, 185)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Coffee"]
-shape = SubResource("RectangleShape2D_coffee")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_coffee"]
-size = Vector2(20, 20)
+shape = SubResource("shape_coffee")
 
 [node name="Cat" type="Area2D" parent="Hotspots" groups=["hotspots"]]
 position = Vector2(300, 200)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Cat"]
-shape = SubResource("CircleShape2D_cat")
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_cat"]
-radius = 12.0
+shape = SubResource("shape_cat")
 
 [node name="Phone" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(380, 60)
+position = Vector2(400, 62)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Phone"]
-shape = SubResource("RectangleShape2D_phone")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_phone"]
-size = Vector2(12, 16)
+shape = SubResource("shape_phone")
 
 [node name="Walls" type="StaticBody2D" parent="."]
 
 [node name="TopWall" type="CollisionShape2D" parent="Walls"]
 position = Vector2(240, -4)
-shape = SubResource("RectangleShape2D_hwall")
+shape = SubResource("shape_hwall")
 
 [node name="BottomWall" type="CollisionShape2D" parent="Walls"]
 position = Vector2(240, 274)
-shape = SubResource("RectangleShape2D_hwall")
+shape = SubResource("shape_hwall")
 
 [node name="LeftWall" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-4, 135)
-shape = SubResource("RectangleShape2D_vwall")
+shape = SubResource("shape_vwall")
 
 [node name="RightWall" type="CollisionShape2D" parent="Walls"]
 position = Vector2(484, 135)
-shape = SubResource("RectangleShape2D_vwall")
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hwall"]
-size = Vector2(488, 8)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vwall"]
-size = Vector2(8, 278)
+shape = SubResource("shape_vwall")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -124,9 +174,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -60.0
-offset_top = -20.0
-offset_right = 60.0
+offset_left = -80.0
+offset_top = -24.0
+offset_right = 80.0
 grow_horizontal = 2
 grow_vertical = 0
+text = "[E] Interact"
 horizontal_alignment = 1

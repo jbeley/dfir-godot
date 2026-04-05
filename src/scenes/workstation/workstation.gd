@@ -64,6 +64,7 @@ func _register_commands() -> void:
 		CmdHayabusa.new(),
 		CmdDissect.new(),
 		CmdJobs.new(),
+		CmdSubmit.new(),
 	]
 
 	for cmd in commands:
