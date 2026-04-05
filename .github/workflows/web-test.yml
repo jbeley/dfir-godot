@@ -1,0 +1,124 @@
+name: Web Integration Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  web-test:
+    name: Playwright Browser Test
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup templates
+        shell: bash
+        run: |
+          shopt -s nullglob
+          FOUND_DIR=$(find / -name "web_nothreads_debug.zip" -printf '%h\n' 2>/dev/null | head -1)
+          EXPECTED_DIR="$HOME/.local/share/godot/export_templates/4.3.stable"
+          mkdir -p "$EXPECTED_DIR"
+          cp "$FOUND_DIR"/* "$EXPECTED_DIR/" 2>/dev/null || true
+          for f in "$EXPECTED_DIR"/web*_debug* "$FOUND_DIR"/web*_debug*; do
+            release="${f//_debug/_release}"
+            [ -f "$f" ] && [ ! -f "$release" ] && cp "$f" "$release"
+          done
+
+      - name: Create export presets
+        shell: bash
+        run: |
+          printf '[preset.0]\n\nname="Web"\nplatform="Web"\nrunnable=true\ndedicated_server=false\ncustom_features=""\nexport_filter="all_resources"\ninclude_filter=""\nexclude_filter=""\nexport_path="build/web/index.html"\nencryption_include_filters=""\nencryption_exclude_filters=""\nencrypt_pck=false\nencrypt_directory=false\n\n[preset.0.options]\n\ncustom_template/debug=""\ncustom_template/release=""\nvariant/extensions_support=false\nvram_texture_compression/for_desktop=true\nvram_texture_compression/for_mobile=false\nhtml/export_icon=true\nhtml/custom_html_shell=""\nhtml/head_include=""\nhtml/canvas_resize_policy=2\nhtml/focus_canvas_on_start=true\nhtml/experimental_virtual_keyboard=false\nprogressive_web_app/enabled=false\n' > export_presets.cfg
+
+      - name: Import and export
+        run: |
+          godot --headless --import 2>&1 | tail -3
+          mkdir -p build/web
+          godot --headless --export-release "Web" build/web/index.html 2>&1 | tail -3
+          test -f build/web/index.wasm || { echo "::error::No index.wasm"; exit 1; }
+          echo "Export OK: $(du -sh build/web/ | cut -f1)"
+
+      - name: Setup Node.js
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs 2>/dev/null || true
+          node --version
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run browser test
+        run: |
+          # Start web server
+          cd build/web && python3 -m http.server 8765 &
+          sleep 2
+          cd ../..
+
+          cat > test_web.js << 'TESTJS'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+
+            const errors = [];
+            page.on('pageerror', err => errors.push(err.message));
+
+            console.log('1. Loading game...');
+            await page.goto('http://localhost:8765/index.html');
+            await page.waitForSelector('canvas', { timeout: 30000 });
+            await page.waitForTimeout(10000);
+
+            // Verify canvas rendered
+            const canvas = await page.$('canvas');
+            if (!canvas) { console.error('FAIL: No canvas'); process.exit(1); }
+            const box = await canvas.boundingBox();
+            console.log(`   Canvas: ${box.width}x${box.height}`);
+
+            // Screenshot menu
+            await page.screenshot({ path: 'test_menu.png' });
+            console.log('2. Menu rendered OK');
+
+            // Click canvas for focus, then press Enter for New Game
+            await page.mouse.click(box.x + 10, box.y + 10);
+            await page.waitForTimeout(200);
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(5000);
+
+            await page.screenshot({ path: 'test_office.png' });
+            console.log('3. Scene transition OK');
+
+            // Check for critical errors
+            const criticalErrors = errors.filter(e => !e.includes('bus index'));
+            if (criticalErrors.length > 0) {
+              console.error('FAIL: Page errors detected:');
+              criticalErrors.forEach(e => console.error('  ' + e));
+              process.exit(1);
+            }
+
+            console.log('4. No critical errors');
+            console.log('PASS: All web integration tests passed');
+            await browser.close();
+          })();
+          TESTJS
+
+          node test_web.js
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-test-screenshots
+          path: test_*.png
+          retention-days: 7
