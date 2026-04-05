@@ -6,6 +6,10 @@ extends Node2D
 @onready var day_night: CanvasModulate = $DayNightModulate
 @onready var interaction_label: Label = $UI/InteractionLabel
 @onready var notification_label: Label = $UI/NotificationLabel
+@onready var floor_rect: ColorRect = $Floor
+@onready var wall_bg: ColorRect = $WallBG
+@onready var wall_trim: ColorRect = $WallTrim
+@onready var rug_sprite: Sprite2D = $Rug
 
 var current_hotspot: String = ""
 var _hud: Node = null
@@ -22,6 +26,7 @@ func _ready() -> void:
 	TutorialManager.hint_shown.connect(_on_tutorial_hint)
 	_update_day_night(TimeManager.current_hour)
 	_setup_hotspots()
+	_apply_apartment_visuals()
 
 	# Tutorial hint
 	TutorialManager.trigger("office_ready")
@@ -132,6 +137,77 @@ func _show_notification(text: String, duration: float = 3.0) -> void:
 	notification_label.text = text
 	notification_label.visible = true
 	_notification_timer = duration
+
+
+func _apply_apartment_visuals() -> void:
+	var config: Dictionary = ApartmentManager.get_config()
+
+	# Apply colors
+	if floor_rect:
+		floor_rect.color = config.get("floor_color", Color(0.22, 0.18, 0.15))
+	if wall_bg:
+		wall_bg.color = config.get("wall_color", Color(0.30, 0.28, 0.32))
+	if wall_trim:
+		wall_trim.color = config.get("trim_color", Color(0.45, 0.40, 0.35))
+	if rug_sprite:
+		rug_sprite.scale = config.get("rug_scale", Vector2(2.5, 2.2))
+
+	# Add extra furniture for upgraded apartments
+	var extras: Array = config.get("extra_furniture", [])
+	var furniture_node := get_node_or_null("Furniture")
+	if furniture_node == null:
+		return
+
+	for item: Variant in extras:
+		var item_name: String = str(item)
+		if furniture_node.has_node(item_name.capitalize()):
+			continue  # Already exists
+		_spawn_extra_furniture(furniture_node, item_name)
+
+
+func _spawn_extra_furniture(parent: Node, item_name: String) -> void:
+	var rect := ColorRect.new()
+	rect.name = item_name.capitalize()
+
+	match item_name:
+		"plant":
+			rect.position = Vector2(420, 200)
+			rect.size = Vector2(16, 20)
+			rect.color = Color(0.2, 0.5, 0.2)
+		"lamp":
+			rect.position = Vector2(130, 140)
+			rect.size = Vector2(8, 24)
+			rect.color = Color(0.7, 0.65, 0.4)
+		"second_monitor":
+			# Add next to existing desk
+			rect.position = Vector2(320, 60)
+			rect.size = Vector2(20, 16)
+			rect.color = Color(0.1, 0.15, 0.2)
+			var screen := ColorRect.new()
+			screen.position = Vector2(2, 1)
+			screen.size = Vector2(16, 12)
+			screen.color = Color(0.15, 0.35, 0.15)
+			rect.add_child(screen)
+		"whiteboard":
+			rect.position = Vector2(340, 8)
+			rect.size = Vector2(50, 28)
+			rect.color = Color(0.9, 0.9, 0.88)
+		"server_rack":
+			rect.position = Vector2(450, 140)
+			rect.size = Vector2(20, 40)
+			rect.color = Color(0.15, 0.15, 0.18)
+			# Blinking lights
+			var led := ColorRect.new()
+			led.position = Vector2(4, 4)
+			led.size = Vector2(3, 2)
+			led.color = Color(0.0, 0.8, 0.0)
+			rect.add_child(led)
+		"awards":
+			rect.position = Vector2(160, 8)
+			rect.size = Vector2(30, 14)
+			rect.color = Color(0.5, 0.4, 0.2)
+
+	parent.add_child(rect)
 
 
 func _update_day_night(_hour: int) -> void:
