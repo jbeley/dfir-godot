@@ -1,0 +1,5 @@
+{
+  "description": "Trimmed MITRE ATT&CK Enterprise techniques. Run tools/sync_threat_intel.py to update.",
+  "last_updated": "2026-04-05",
+  "techniques": []
+}

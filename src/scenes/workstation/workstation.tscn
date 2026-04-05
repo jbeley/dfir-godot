@@ -1,0 +1,87 @@
+[gd_scene load_steps=2 format=3 uid="uid://workstation"]
+
+[ext_resource type="Script" path="res://src/scenes/workstation/workstation.gd" id="1_ws"]
+
+[node name="Workstation" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ws")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="MonitorFrame" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -20.0
+
+[node name="TabContainer" type="TabContainer" parent="MonitorFrame"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+
+[node name="Terminal" type="VBoxContainer" parent="MonitorFrame/TabContainer"]
+layout_mode = 2
+
+[node name="TerminalOutput" type="RichTextLabel" parent="MonitorFrame/TabContainer/Terminal"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_following = true
+
+[node name="TerminalInput" type="LineEdit" parent="MonitorFrame/TabContainer/Terminal"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Type a command..."
+caret_blink = true
+
+[node name="LogViewer" type="VBoxContainer" parent="MonitorFrame/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Placeholder" type="Label" parent="MonitorFrame/TabContainer/LogViewer"]
+layout_mode = 2
+text = "Log Viewer - Coming in Phase 2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Email" type="VBoxContainer" parent="MonitorFrame/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Placeholder" type="Label" parent="MonitorFrame/TabContainer/Email"]
+layout_mode = 2
+text = "Email Client - Coming in Phase 3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusBar" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_top = 252.0
+offset_bottom = 270.0
+horizontal_alignment = 1
+vertical_alignment = 1

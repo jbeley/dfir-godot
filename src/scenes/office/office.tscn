@@ -1,0 +1,132 @@
+[gd_scene load_steps=3 format=3 uid="uid://office"]
+
+[ext_resource type="Script" path="res://src/scenes/office/office.gd" id="1_office"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+
+[node name="Office" type="Node2D"]
+script = ExtResource("1_office")
+
+[node name="BG" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.15, 0.13, 0.12, 1)
+
+[node name="DayNightModulate" type="CanvasModulate" parent="."]
+color = Color(1, 1, 1, 1)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(240, 160)
+
+[node name="Furniture" type="Node2D" parent="."]
+
+[node name="DeskSprite" type="Sprite2D" parent="Furniture"]
+position = Vector2(360, 80)
+texture_filter = 0
+
+[node name="BedSprite" type="Sprite2D" parent="Furniture"]
+position = Vector2(80, 60)
+texture_filter = 0
+
+[node name="CoffeeSprite" type="Sprite2D" parent="Furniture"]
+position = Vector2(60, 180)
+texture_filter = 0
+
+[node name="BoardSprite" type="Sprite2D" parent="Furniture"]
+position = Vector2(240, 20)
+texture_filter = 0
+
+[node name="Hotspots" type="Node2D" parent="."]
+
+[node name="Desk" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(360, 80)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Desk"]
+shape = SubResource("RectangleShape2D_desk")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_desk"]
+size = Vector2(48, 32)
+
+[node name="EvidenceBoard" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(240, 24)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/EvidenceBoard"]
+shape = SubResource("RectangleShape2D_board")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_board"]
+size = Vector2(64, 16)
+
+[node name="Bed" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(80, 60)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Bed"]
+shape = SubResource("RectangleShape2D_bed")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bed"]
+size = Vector2(40, 48)
+
+[node name="Coffee" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(60, 180)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Coffee"]
+shape = SubResource("RectangleShape2D_coffee")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_coffee"]
+size = Vector2(20, 20)
+
+[node name="Cat" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(300, 200)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Cat"]
+shape = SubResource("CircleShape2D_cat")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cat"]
+radius = 12.0
+
+[node name="Phone" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(380, 60)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/Phone"]
+shape = SubResource("RectangleShape2D_phone")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_phone"]
+size = Vector2(12, 16)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="TopWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(240, -4)
+shape = SubResource("RectangleShape2D_hwall")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(240, 274)
+shape = SubResource("RectangleShape2D_hwall")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-4, 135)
+shape = SubResource("RectangleShape2D_vwall")
+
+[node name="RightWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(484, 135)
+shape = SubResource("RectangleShape2D_vwall")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hwall"]
+size = Vector2(488, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vwall"]
+size = Vector2(8, 278)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="InteractionLabel" type="Label" parent="UI"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -20.0
+offset_right = 60.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1

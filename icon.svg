@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#1a1a2e"/>
+  <text x="64" y="58" font-family="monospace" font-size="14" fill="#00ff41" text-anchor="middle">DFIR</text>
+  <text x="64" y="78" font-family="monospace" font-size="10" fill="#00ff41" text-anchor="middle">SIMULATOR</text>
+  <rect x="20" y="90" width="88" height="2" fill="#00ff41" opacity="0.5"/>
+  <text x="64" y="108" font-family="monospace" font-size="8" fill="#666" text-anchor="middle">$ investigate _</text>
+</svg>
