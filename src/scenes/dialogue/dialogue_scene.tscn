@@ -1,0 +1,83 @@
+[gd_scene load_steps=2 format=3 uid="uid://dialogue_scene"]
+
+[ext_resource type="Script" path="res://src/scenes/dialogue/dialogue_scene.gd" id="1_dlg"]
+
+[node name="DialogueScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_dlg")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.06, 0.06, 0.08, 1)
+
+[node name="TopSection" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 80.0
+
+[node name="PortraitRect" type="ColorRect" parent="TopSection"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(60, 60)
+color = Color(0.5, 0.3, 0.3, 1)
+
+[node name="PortraitLabel" type="Label" parent="TopSection/PortraitRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -8.0
+offset_right = 10.0
+offset_bottom = 8.0
+text = "NPC"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TextPanel" type="VBoxContainer" parent="TopSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SpeakerLabel" type="Label" parent="TopSection/TextPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Speaker Name"
+
+[node name="DialogueText" type="RichTextLabel" parent="TopSection/TextPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "..."
+
+[node name="ContinueLabel" type="Label" parent="TopSection/TextPanel"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "[E] Continue"
+horizontal_alignment = 2
+
+[node name="ChoicesContainer" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -100.0
+offset_right = -8.0
+offset_bottom = -8.0
+theme_override_constants/separation = 4
