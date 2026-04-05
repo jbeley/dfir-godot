@@ -26,34 +26,33 @@ jobs:
 
       - name: Setup templates
         run: |
-          # barichello/godot-ci puts templates in /github/home
-          # but godot looks in $HOME which may differ in containers
-          TEMPLATE_DIR="/github/home/.local/share/godot/export_templates/4.3.stable"
-          echo "Templates in image:"
-          ls -la "$TEMPLATE_DIR/" | grep web || echo "No web templates found"
-
-          # Copy debug template as release template (release is missing in this image)
-          if [ -f "$TEMPLATE_DIR/web_nothreads_debug.zip" ] && [ ! -f "$TEMPLATE_DIR/web_nothreads_release.zip" ]; then
-            echo "Copying debug template as release fallback"
-            cp "$TEMPLATE_DIR/web_nothreads_debug.zip" "$TEMPLATE_DIR/web_nothreads_release.zip"
-          fi
-          if [ -f "$TEMPLATE_DIR/web_debug.zip" ] && [ ! -f "$TEMPLATE_DIR/web_release.zip" ]; then
-            cp "$TEMPLATE_DIR/web_debug.zip" "$TEMPLATE_DIR/web_release.zip"
-          fi
-
-          # Also ensure HOME-relative path works
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
-          cp "$TEMPLATE_DIR"/* "$HOME/.local/share/godot/export_templates/4.3.stable/" 2>/dev/null || true
-          echo "Final templates:"
-          ls -la "$HOME/.local/share/godot/export_templates/4.3.stable/" | grep web
+          # Ensure templates are where Godot expects them
+          TEMPLATE_SRC="/github/home/.local/share/godot/export_templates/4.3.stable"
+          TEMPLATE_DST="$HOME/.local/share/godot/export_templates/4.3.stable"
+          mkdir -p "$TEMPLATE_DST"
+          cp "$TEMPLATE_SRC"/* "$TEMPLATE_DST/" 2>/dev/null || true
+          # Also copy debug as release fallback
+          for f in "$TEMPLATE_DST"/web*_debug*; do
+            release_name="${f//_debug/_release}"
+            if [ ! -f "$release_name" ]; then
+              cp "$f" "$release_name"
+            fi
+          done
+          # Do the same in source dir
+          for f in "$TEMPLATE_SRC"/web*_debug*; do
+            release_name="${f//_debug/_release}"
+            if [ ! -f "$release_name" ]; then
+              cp "$f" "$release_name"
+            fi
+          done
+          echo "Templates available:"
+          ls "$TEMPLATE_SRC"/web* "$TEMPLATE_DST"/web* 2>/dev/null
 
       - name: Create export presets
         shell: bash
         run: |
-          # Write export_presets.cfg with no leading whitespace
           printf '%s\n' \
-            '[preset.0]' \
-            '' \
+            '[preset.0]' '' \
             'name="Web"' \
             'platform="Web"' \
             'runnable=true' \
@@ -66,10 +65,8 @@ jobs:
             'encryption_include_filters=""' \
             'encryption_exclude_filters=""' \
             'encrypt_pck=false' \
-            'encrypt_directory=false' \
-            '' \
-            '[preset.0.options]' \
-            '' \
+            'encrypt_directory=false' '' \
+            '[preset.0.options]' '' \
             'custom_template/debug=""' \
             'custom_template/release=""' \
             'variant/extensions_support=false' \
@@ -83,8 +80,6 @@ jobs:
             'html/experimental_virtual_keyboard=false' \
             'progressive_web_app/enabled=false' \
             > export_presets.cfg
-          echo "=== export_presets.cfg ==="
-          cat export_presets.cfg
 
       - name: Import project
         run: godot --headless --import 2>&1 | tail -5
@@ -92,17 +87,17 @@ jobs:
       - name: Export web build
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" build/web/index.html 2>&1
-          echo "=== Build output ==="
+          # Try release first, fall back to debug
+          godot --headless --export-release "Web" build/web/index.html 2>&1 || \
+          godot --headless --export-debug "Web" build/web/index.html 2>&1
           ls -lh build/web/
-          test -f build/web/index.html || { echo "::error::Export failed - no index.html"; exit 1; }
+          test -f build/web/index.html || { echo "::error::Export failed"; exit 1; }
 
       - name: Add cross-origin isolation
         run: |
           cd build/web
           printf '%s' 'if(typeof window==="undefined"){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI OK:")).catch(console.error.bind(console,"COI fail:"));}' > coi-serviceworker.js
           sed -i 's|<script |<script src="coi-serviceworker.js"></script><script |' index.html
-          ls -lh .
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
