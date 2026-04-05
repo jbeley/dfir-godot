@@ -151,8 +151,8 @@ func _on_case_completed(case_data: Resource, _score: float) -> void:
 	total_cases_completed += 1
 
 	# Check for arc progression
-	if case_data is CaseData and case_data.story_arc_id != "":
-		var arc_id: String = case_data.story_arc_id
+	if case_data.has_method("get") and case_data.get("story_arc_id") != null and str(case_data.get("story_arc_id")) != "":
+		var arc_id: String = str(case_data.get("story_arc_id"))
 		if not completed_arcs.has(arc_id):
 			completed_arcs[arc_id] = []
 		completed_arcs[arc_id].append(total_cases_completed)

@@ -27,19 +27,22 @@ func _ready() -> void:
 
 
 func _on_new_game() -> void:
+	# Disable buttons to prevent double-click
+	new_game_btn.disabled = true
+
 	# Load the tutorial case
 	var tutorial_case := SampleCaseLoader.create_tutorial_case()
 	tutorial_case.activate()
 	CaseManager.add_case(tutorial_case)
 
-	GameManager.change_scene("res://src/scenes/office/office.tscn")
 	GameManager.change_state(GameManager.GameState.PLAYING)
+	get_tree().change_scene_to_file("res://src/scenes/office/office.tscn")
 
 
 func _on_continue() -> void:
 	if GameManager.load_game():
-		GameManager.change_scene("res://src/scenes/office/office.tscn")
 		GameManager.change_state(GameManager.GameState.PLAYING)
+		get_tree().change_scene_to_file("res://src/scenes/office/office.tscn")
 
 
 func _on_settings() -> void:
