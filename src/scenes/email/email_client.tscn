@@ -1,0 +1,85 @@
+[gd_scene load_steps=2 format=3 uid="uid://email_client"]
+
+[ext_resource type="Script" path="res://src/scenes/email/email_client.gd" id="1_email"]
+
+[node name="EmailClient" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_email")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.1, 1)
+
+[node name="HSplit" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -16.0
+
+[node name="LeftPanel" type="VBoxContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+
+[node name="InboxLabel" type="Label" parent="HSplit/LeftPanel"]
+layout_mode = 2
+text = "Inbox"
+
+[node name="EmailList" type="ItemList" parent="HSplit/LeftPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RightPanel" type="VBoxContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.6
+
+[node name="FromLabel" type="Label" parent="HSplit/RightPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "From:"
+
+[node name="SubjectLabel" type="Label" parent="HSplit/RightPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Subject:"
+
+[node name="Sep" type="HSeparator" parent="HSplit/RightPanel"]
+layout_mode = 2
+
+[node name="BodyText" type="RichTextLabel" parent="HSplit/RightPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Select an email to read."
+
+[node name="AcceptBtn" type="Button" parent="HSplit/RightPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "Accept Case"
+
+[node name="BottomBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -14.0
+
+[node name="BackBtn" type="Button" parent="BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back [ESC]"

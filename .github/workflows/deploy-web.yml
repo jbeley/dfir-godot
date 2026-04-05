@@ -25,28 +25,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup templates
+        shell: bash
         run: |
-          # Ensure templates are where Godot expects them
+          shopt -s nullglob
           TEMPLATE_SRC="/github/home/.local/share/godot/export_templates/4.3.stable"
           TEMPLATE_DST="$HOME/.local/share/godot/export_templates/4.3.stable"
           mkdir -p "$TEMPLATE_DST"
+          # Copy all templates from image location
           cp "$TEMPLATE_SRC"/* "$TEMPLATE_DST/" 2>/dev/null || true
-          # Also copy debug as release fallback
-          for f in "$TEMPLATE_DST"/web*_debug*; do
+          # Copy debug templates as release (image only ships debug)
+          for f in "$TEMPLATE_DST"/web*_debug* "$TEMPLATE_SRC"/web*_debug*; do
             release_name="${f//_debug/_release}"
-            if [ ! -f "$release_name" ]; then
+            if [ -f "$f" ] && [ ! -f "$release_name" ]; then
               cp "$f" "$release_name"
+              echo "Created $release_name from $f"
             fi
           done
-          # Do the same in source dir
-          for f in "$TEMPLATE_SRC"/web*_debug*; do
-            release_name="${f//_debug/_release}"
-            if [ ! -f "$release_name" ]; then
-              cp "$f" "$release_name"
-            fi
-          done
-          echo "Templates available:"
-          ls "$TEMPLATE_SRC"/web* "$TEMPLATE_DST"/web* 2>/dev/null
+          echo "=== Templates ==="
+          ls -la "$TEMPLATE_SRC"/web* 2>/dev/null || echo "No templates in SRC"
+          ls -la "$TEMPLATE_DST"/web* 2>/dev/null || echo "No templates in DST"
 
       - name: Create export presets
         shell: bash

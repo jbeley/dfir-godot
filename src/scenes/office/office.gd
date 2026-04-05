@@ -67,7 +67,7 @@ func _on_player_interact(target: Node2D) -> void:
 		"Cat":
 			ReputationManager.pet_cat()
 		"Phone":
-			pass  # TODO: Phone/dialogue scene
+			GameManager.change_scene("res://src/scenes/email/email_client.tscn")
 
 
 func _update_day_night(_hour: int) -> void:
