@@ -25,6 +25,7 @@ CaseManager="*res://src/autoloads/case_manager.gd"
 ThreatIntelManager="*res://src/autoloads/threat_intel_manager.gd"
 ReputationManager="*res://src/autoloads/reputation_manager.gd"
 AudioManager="*res://src/autoloads/audio_manager.gd"
+InterruptionManager="*res://src/systems/interruptions/interruption_manager.gd"
 
 [display]
 
