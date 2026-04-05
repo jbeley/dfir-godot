@@ -42,7 +42,7 @@ func _on_continue() -> void:
 
 
 func _on_settings() -> void:
-	pass  # TODO: Settings menu scene
+	GameManager.change_scene("res://src/scenes/settings/settings_menu.tscn")
 
 
 func _on_quit() -> void:

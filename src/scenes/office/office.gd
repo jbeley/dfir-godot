@@ -17,6 +17,7 @@ func _ready() -> void:
 	GameManager.change_state(GameManager.GameState.PLAYING)
 	player.interacted_with.connect(_on_player_interact)
 	TimeManager.hour_changed.connect(_update_day_night)
+	InterruptionManager.interruption_triggered.connect(_on_interruption)
 	_update_day_night(TimeManager.current_hour)
 	_setup_hotspots()
 
@@ -100,6 +101,11 @@ func _on_player_interact(target: Node2D) -> void:
 			_show_notification("Purrrr... Stress -10")
 		"Phone":
 			GameManager.change_scene("res://src/scenes/email/email_client.tscn")
+
+
+func _on_interruption(interruption: Dictionary) -> void:
+	var text: String = str(interruption.get("text", "Something happened..."))
+	_show_notification(text, 4.0)
 
 
 func _show_notification(text: String, duration: float = 3.0) -> void:

@@ -1,0 +1,91 @@
+[gd_scene load_steps=2 format=3 uid="uid://settings_menu"]
+
+[ext_resource type="Script" path="res://src/scenes/settings/settings_menu.gd" id="1_settings"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_settings")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.1, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -90.0
+offset_right = 100.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="Sep1" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 80.0
+
+[node name="SFXLabel" type="Label" parent="VBox"]
+layout_mode = 2
+text = "SFX Volume"
+
+[node name="SFXSlider" type="HSlider" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+value = 80.0
+
+[node name="Sep2" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="FullscreenCheck" type="CheckButton" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Fullscreen"
+
+[node name="GameSpeedLabel" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Game Speed: 5x"
+
+[node name="GameSpeedSlider" type="HSlider" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 20.0
+step = 1.0
+value = 5.0
+
+[node name="Sep3" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="BackBtn" type="Button" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
