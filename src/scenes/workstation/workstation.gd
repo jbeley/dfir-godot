@@ -65,6 +65,9 @@ func _register_commands() -> void:
 		CmdDissect.new(),
 		CmdJobs.new(),
 		CmdSubmit.new(),
+		CmdIoc.new(),
+		CmdTimeline.new(),
+		CmdTechnique.new(),
 	]
 
 	for cmd in commands:
