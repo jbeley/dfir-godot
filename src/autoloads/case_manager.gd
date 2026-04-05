@@ -39,7 +39,7 @@ func get_active_case_count() -> int:
 
 func _check_deadlines(_hour: int) -> void:
 	var current_hours := TimeManager.get_total_hours()
-	for case_data in active_cases:
+	for case_data: Resource in active_cases:
 		if not case_data.has_method("get") or not case_data.get("deadline_hours"):
 			continue
 		var remaining: float = case_data.deadline_hours - current_hours

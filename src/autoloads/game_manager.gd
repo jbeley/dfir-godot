@@ -87,18 +87,18 @@ func load_game(slot: int = 0) -> bool:
 		return false
 
 	var data: Dictionary = json.data
-	ReputationManager.reputation = data.get("reputation", 50.0)
-	ReputationManager.career_tier = data.get("career_tier", 0)
+	ReputationManager.reputation = float(data.get("reputation", 50.0))
+	ReputationManager.career_tier = int(data.get("career_tier", 0))
 
-	var time_data: Dictionary = data.get("time", {})
-	TimeManager.current_day = time_data.get("day", 1)
-	TimeManager.current_hour = time_data.get("hour", 8)
-	TimeManager.current_minute = time_data.get("minute", 0)
+	var time_data: Dictionary = data.get("time", {}) as Dictionary
+	TimeManager.current_day = int(time_data.get("day", 1))
+	TimeManager.current_hour = int(time_data.get("hour", 8))
+	TimeManager.current_minute = int(time_data.get("minute", 0))
 
-	var stats: Dictionary = data.get("stats", {})
-	ReputationManager.focus = stats.get("focus", 100.0)
-	ReputationManager.energy = stats.get("energy", 100.0)
-	ReputationManager.stress = stats.get("stress", 0.0)
+	var stats: Dictionary = data.get("stats", {}) as Dictionary
+	ReputationManager.focus = float(stats.get("focus", 100.0))
+	ReputationManager.energy = float(stats.get("energy", 100.0))
+	ReputationManager.stress = float(stats.get("stress", 0.0))
 
 	return true
 
