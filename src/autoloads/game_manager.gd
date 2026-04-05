@@ -4,16 +4,10 @@ extends Node
 enum GameState { MENU, PLAYING, PAUSED }
 
 var current_state: GameState = GameState.MENU
-var current_scene: Node = null
 
 signal state_changed(new_state: GameState)
 signal scene_transition_started
 signal scene_transition_finished
-
-
-func _ready() -> void:
-	var root := get_tree().root
-	current_scene = root.get_child(root.get_child_count() - 1)
 
 
 func change_state(new_state: GameState) -> void:
@@ -25,22 +19,13 @@ func change_state(new_state: GameState) -> void:
 
 func change_scene(scene_path: String) -> void:
 	scene_transition_started.emit()
-	# Deferred to avoid issues during physics/input processing
-	call_deferred("_deferred_change_scene", scene_path)
-
-
-func _deferred_change_scene(scene_path: String) -> void:
-	if current_scene:
-		current_scene.free()
-
-	var new_scene := ResourceLoader.load(scene_path) as PackedScene
-	if new_scene == null:
-		push_error("Failed to load scene: %s" % scene_path)
+	# Use Godot's built-in scene changer - handles freeing old scene safely
+	var err := get_tree().change_scene_to_file(scene_path)
+	if err != OK:
+		push_error("Failed to change scene to: %s (error %d)" % [scene_path, err])
 		return
-
-	current_scene = new_scene.instantiate()
-	get_tree().root.add_child(current_scene)
-	get_tree().current_scene = current_scene
+	# Wait for the scene to be ready
+	await get_tree().tree_changed
 	scene_transition_finished.emit()
 
 
