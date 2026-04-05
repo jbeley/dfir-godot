@@ -40,6 +40,8 @@ func _ready() -> void:
 	_print_welcome()
 	_update_status_bar()
 	TimeManager.minute_changed.connect(func(_m: int): _update_status_bar())
+	TutorialManager.hint_shown.connect(_on_tutorial_hint)
+	TutorialManager.trigger("terminal_opened")
 
 
 func _register_commands() -> void:
@@ -153,6 +155,9 @@ func _on_command_submitted(command: String) -> void:
 	var pipeline: CommandParser.Pipeline = CommandParser.parse(trimmed)
 	_execute_pipeline(pipeline)
 	_print_prompt()
+
+	# Tutorial triggers based on command used
+	_trigger_tutorial(trimmed)
 
 	# Drain work stats
 	ReputationManager.work_drain(0.5)
@@ -271,3 +276,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause_game"):
 		GameManager.change_scene("res://src/scenes/office/office.tscn")
+
+
+func _trigger_tutorial(command: String) -> void:
+	var cmd_name := command.split(" ")[0].to_lower() if " " in command else command.to_lower()
+	match cmd_name:
+		"ls":
+			TutorialManager.trigger("first_ls")
+		"grep", "cat":
+			TutorialManager.trigger("first_grep")
+		"ioc":
+			TutorialManager.trigger("first_ioc")
+		"timeline":
+			TutorialManager.trigger("first_timeline")
+		"technique":
+			# Check if player has IOCs + timeline + techniques for submit hint
+			if not CaseManager.active_cases.is_empty():
+				var c: CaseData = CaseManager.active_cases[0]
+				if not c.discovered_iocs.is_empty() and not c.timeline_entries.is_empty() and not c.mapped_techniques.is_empty():
+					TutorialManager.trigger("has_all_components")
+
+
+func _on_tutorial_hint(text: String) -> void:
+	_print_line("\n[color=yellow]💡 %s[/color]\n" % text)
+	_print_prompt()

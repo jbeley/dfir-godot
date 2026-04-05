@@ -34,10 +34,12 @@ func save_game(slot: int = 0) -> void:
 	DirAccess.make_dir_recursive_absolute("user://saves")
 
 	var save_data := {
-		"version": 1,
+		"version": 2,
 		"timestamp": Time.get_datetime_string_from_system(),
 		"reputation": ReputationManager.reputation,
 		"career_tier": ReputationManager.career_tier,
+		"total_completed": ReputationManager.total_cases_completed,
+		"total_failed": ReputationManager.total_cases_failed,
 		"time": {
 			"day": TimeManager.current_day,
 			"hour": TimeManager.current_hour,
@@ -47,6 +49,11 @@ func save_game(slot: int = 0) -> void:
 			"focus": ReputationManager.focus,
 			"energy": ReputationManager.energy,
 			"stress": ReputationManager.stress,
+		},
+		"campaign": {
+			"act": CampaignManager.current_act,
+			"completed_arcs": CampaignManager.completed_arcs,
+			"total_cases": CampaignManager.total_cases_completed,
 		},
 	}
 
@@ -84,6 +91,16 @@ func load_game(slot: int = 0) -> bool:
 	ReputationManager.focus = float(stats.get("focus", 100.0))
 	ReputationManager.energy = float(stats.get("energy", 100.0))
 	ReputationManager.stress = float(stats.get("stress", 0.0))
+	ReputationManager.total_cases_completed = int(data.get("total_completed", 0))
+	ReputationManager.total_cases_failed = int(data.get("total_failed", 0))
+
+	# Restore campaign state
+	var campaign: Dictionary = data.get("campaign", {}) as Dictionary
+	CampaignManager.current_act = int(campaign.get("act", 0))
+	CampaignManager.total_cases_completed = int(campaign.get("total_cases", 0))
+	var arcs: Variant = campaign.get("completed_arcs", {})
+	if arcs is Dictionary:
+		CampaignManager.completed_arcs = arcs as Dictionary
 
 	return true
 

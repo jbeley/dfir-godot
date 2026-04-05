@@ -39,8 +39,15 @@ func _add_welcome_email() -> void:
 
 
 func _generate_case_email() -> void:
-	var gen := CaseGenerator.new()
-	var case_data := gen.generate_case(ReputationManager.career_tier)
+	var case_data: CaseData
+
+	# Try campaign case first, fall back to procedural
+	var campaign_case := _try_campaign_case()
+	if campaign_case:
+		case_data = campaign_case
+	else:
+		var gen := CaseGenerator.new()
+		case_data = gen.generate_case(ReputationManager.career_tier)
 
 	var email_idx := _emails.size()
 	_add_email({
@@ -98,6 +105,44 @@ func _on_accept() -> void:
 
 func _on_back() -> void:
 	GameManager.change_scene("res://src/scenes/office/office.tscn")
+
+
+func _try_campaign_case() -> CaseData:
+	## Try to get the next campaign case from CampaignManager.
+	var tree := Engine.get_main_loop() as SceneTree
+	if not tree or not tree.root.has_node("/root/CampaignManager"):
+		return null
+
+	var cm: Node = tree.root.get_node("/root/CampaignManager")
+	if cm.call("is_campaign_complete"):
+		return null
+
+	var available: Array = cm.call("get_available_arcs")
+	for arc_id: Variant in available:
+		var next_case: Dictionary = cm.call("get_next_case_for_arc", str(arc_id))
+		if next_case.is_empty():
+			continue
+
+		# Build CaseData from campaign template
+		var gen := CaseGenerator.new()
+		var case_data := gen.generate_case(ReputationManager.career_tier)
+		case_data.title = str(next_case.get("title", case_data.title))
+		case_data.description = str(next_case.get("description", case_data.description))
+		case_data.story_arc_id = str(arc_id)
+		case_data.deadline_hours = float(next_case.get("deadline_hours", 48.0))
+
+		var severity_val: Variant = next_case.get("severity", 2)
+		case_data.severity = int(severity_val) as CaseData.Severity
+
+		case_data.attack_technique_ids = PackedStringArray()
+		var techniques: Variant = next_case.get("techniques", [])
+		if techniques is Array:
+			for t: Variant in techniques as Array:
+				case_data.attack_technique_ids.append(str(t))
+
+		return case_data
+
+	return null
 
 
 func _unhandled_input(event: InputEvent) -> void:
