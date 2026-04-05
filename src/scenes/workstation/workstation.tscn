@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://workstation"]
+[gd_scene load_steps=4 format=3 uid="uid://workstation"]
 
 [ext_resource type="Script" path="res://src/scenes/workstation/workstation.gd" id="1_ws"]
+[ext_resource type="Shader" path="res://src/ui/shaders/crt.gdshader" id="2_crt"]
+
+[sub_resource type="ShaderMaterial" id="crt_material"]
+shader = ExtResource("2_crt")
+shader_parameter/scanline_intensity = 0.12
+shader_parameter/curvature = 0.015
+shader_parameter/vignette_intensity = 0.25
+shader_parameter/brightness = 1.1
+shader_parameter/flicker = 0.008
+shader_parameter/phosphor_tint = Vector3(0.9, 1.0, 0.85)
 
 [node name="Workstation" type="Control"]
 layout_mode = 3
@@ -85,3 +95,11 @@ offset_top = 252.0
 offset_bottom = 270.0
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="CRTOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+material = SubResource("crt_material")

@@ -110,6 +110,7 @@ func _print_welcome() -> void:
 
 
 func _on_command_submitted(command: String) -> void:
+	SfxBank.play("enter")
 	terminal_input.clear()
 	if command.strip_edges() == "":
 		_print_prompt()
