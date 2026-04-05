@@ -33,7 +33,17 @@ func play(sound_name: String) -> void:
 		AudioManager.play_sfx_oneshot(sounds[sound_name])
 
 
-func play_music_ambient() -> void:
-	var path := "res://assets/audio/music/ambient_office.wav"
-	if ResourceLoader.exists(path):
+func play_music(track_name: String) -> void:
+	var paths := {
+		"ambient": "res://assets/audio/music/ambient_office.wav",
+		"chill": "res://assets/audio/music/chill_investigation.wav",
+		"tense": "res://assets/audio/music/tense_deadline.wav",
+		"menu": "res://assets/audio/music/menu_theme.wav",
+	}
+	var path: String = paths.get(track_name, "")
+	if path != "" and ResourceLoader.exists(path):
 		AudioManager.play_music(load(path))
+
+
+func play_music_ambient() -> void:
+	play_music("chill")

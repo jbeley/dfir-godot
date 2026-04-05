@@ -10,6 +10,7 @@ extends Control
 
 func _ready() -> void:
 	GameManager.change_state(GameManager.GameState.MENU)
+	SfxBank.play_music("menu")
 
 	# Check for existing save
 	continue_btn.disabled = not GameManager.has_save()

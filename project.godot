@@ -28,6 +28,7 @@ AudioManager="*res://src/autoloads/audio_manager.gd"
 InterruptionManager="*res://src/systems/interruptions/interruption_manager.gd"
 SfxBank="*res://src/autoloads/sfx_bank.gd"
 CampaignManager="*res://src/systems/campaign/campaign_manager.gd"
+TutorialManager="*res://src/systems/tutorial/tutorial_manager.gd"
 
 [display]
 
