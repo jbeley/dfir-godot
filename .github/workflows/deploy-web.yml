@@ -28,67 +28,72 @@ jobs:
         shell: bash
         run: |
           shopt -s nullglob
-          TEMPLATE_SRC="/github/home/.local/share/godot/export_templates/4.3.stable"
-          TEMPLATE_DST="$HOME/.local/share/godot/export_templates/4.3.stable"
-          mkdir -p "$TEMPLATE_DST"
-          # Copy all templates from image location
-          cp "$TEMPLATE_SRC"/* "$TEMPLATE_DST/" 2>/dev/null || true
-          # Copy debug templates as release (image only ships debug)
-          for f in "$TEMPLATE_DST"/web*_debug* "$TEMPLATE_SRC"/web*_debug*; do
-            release_name="${f//_debug/_release}"
-            if [ -f "$f" ] && [ ! -f "$release_name" ]; then
-              cp "$f" "$release_name"
-              echo "Created $release_name from $f"
+
+          # Find where templates live in this container
+          echo "=== Searching for templates ==="
+          FOUND_DIR=$(find / -name "web_nothreads_debug.zip" -printf '%h\n' 2>/dev/null | head -1)
+          echo "Found templates in: $FOUND_DIR"
+
+          if [ -z "$FOUND_DIR" ]; then
+            echo "::error::No web export templates found in container"
+            exit 1
+          fi
+
+          # Ensure Godot can find them at the expected path
+          EXPECTED_DIR="$HOME/.local/share/godot/export_templates/4.3.stable"
+          mkdir -p "$EXPECTED_DIR"
+
+          if [ "$FOUND_DIR" != "$EXPECTED_DIR" ]; then
+            echo "Copying templates from $FOUND_DIR to $EXPECTED_DIR"
+            cp "$FOUND_DIR"/* "$EXPECTED_DIR/" 2>/dev/null || true
+          fi
+
+          # Create release templates from debug if missing
+          for f in "$EXPECTED_DIR"/web*_debug*; do
+            release="${f//_debug/_release}"
+            if [ -f "$f" ] && [ ! -f "$release" ]; then
+              cp "$f" "$release"
+              echo "Created: $(basename "$release")"
             fi
           done
-          echo "=== Templates ==="
-          ls -la "$TEMPLATE_SRC"/web* 2>/dev/null || echo "No templates in SRC"
-          ls -la "$TEMPLATE_DST"/web* 2>/dev/null || echo "No templates in DST"
+
+          # Also do the same in the found directory
+          for f in "$FOUND_DIR"/web*_debug*; do
+            release="${f//_debug/_release}"
+            if [ -f "$f" ] && [ ! -f "$release" ]; then
+              cp "$f" "$release"
+              echo "Created: $(basename "$release") (in source dir)"
+            fi
+          done
+
+          echo "=== Available templates ==="
+          ls -1 "$EXPECTED_DIR"/web* 2>/dev/null
+          ls -1 "$FOUND_DIR"/web* 2>/dev/null
 
       - name: Create export presets
         shell: bash
         run: |
-          printf '%s\n' \
-            '[preset.0]' '' \
-            'name="Web"' \
-            'platform="Web"' \
-            'runnable=true' \
-            'dedicated_server=false' \
-            'custom_features=""' \
-            'export_filter="all_resources"' \
-            'include_filter=""' \
-            'exclude_filter=""' \
-            'export_path="build/web/index.html"' \
-            'encryption_include_filters=""' \
-            'encryption_exclude_filters=""' \
-            'encrypt_pck=false' \
-            'encrypt_directory=false' '' \
-            '[preset.0.options]' '' \
-            'custom_template/debug=""' \
-            'custom_template/release=""' \
-            'variant/extensions_support=false' \
-            'vram_texture_compression/for_desktop=true' \
-            'vram_texture_compression/for_mobile=false' \
-            'html/export_icon=true' \
-            'html/custom_html_shell=""' \
-            'html/head_include=""' \
-            'html/canvas_resize_policy=2' \
-            'html/focus_canvas_on_start=true' \
-            'html/experimental_virtual_keyboard=false' \
-            'progressive_web_app/enabled=false' \
-            > export_presets.cfg
+          printf '[preset.0]\n\nname="Web"\nplatform="Web"\nrunnable=true\ndedicated_server=false\ncustom_features=""\nexport_filter="all_resources"\ninclude_filter=""\nexclude_filter=""\nexport_path="build/web/index.html"\nencryption_include_filters=""\nencryption_exclude_filters=""\nencrypt_pck=false\nencrypt_directory=false\n\n[preset.0.options]\n\ncustom_template/debug=""\ncustom_template/release=""\nvariant/extensions_support=false\nvram_texture_compression/for_desktop=true\nvram_texture_compression/for_mobile=false\nhtml/export_icon=true\nhtml/custom_html_shell=""\nhtml/head_include=""\nhtml/canvas_resize_policy=2\nhtml/focus_canvas_on_start=true\nhtml/experimental_virtual_keyboard=false\nprogressive_web_app/enabled=false\n' > export_presets.cfg
+          cat export_presets.cfg
 
       - name: Import project
-        run: godot --headless --import 2>&1 | tail -5
+        run: |
+          godot --headless --import 2>&1 || true
+          echo "Import complete"
 
       - name: Export web build
         run: |
           mkdir -p build/web
-          # Try release first, fall back to debug
-          godot --headless --export-release "Web" build/web/index.html 2>&1 || \
-          godot --headless --export-debug "Web" build/web/index.html 2>&1
+          echo "=== Exporting ==="
+          godot --headless --export-release "Web" build/web/index.html 2>&1
+          EXPORT_EXIT=$?
+          echo "=== Export exit code: $EXPORT_EXIT ==="
           ls -lh build/web/
-          test -f build/web/index.html || { echo "::error::Export failed"; exit 1; }
+          if [ ! -f build/web/index.wasm ]; then
+            echo "::error::Export failed - no index.wasm produced"
+            exit 1
+          fi
+          echo "Export successful: $(du -sh build/web/ | cut -f1) total"
 
       - name: Add cross-origin isolation
         run: |
