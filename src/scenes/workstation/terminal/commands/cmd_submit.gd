@@ -73,5 +73,6 @@ func execute(args: PackedStringArray, _piped_input: String = "") -> String:
 		output += "  - %s\n" % line
 
 	output += "\nReputation earned: [color=green]+%.1f[/color]" % result.reputation_earned
+	output += "\n\n[color=gray]Check your email for new case assignments.[/color]"
 
 	return output

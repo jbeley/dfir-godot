@@ -3,6 +3,11 @@
 
 # Build output
 build/
+
+# Node (test tooling only)
+node_modules/
+package.json
+package-lock.json
 export_presets.cfg
 
 # Godot-specific ignores
