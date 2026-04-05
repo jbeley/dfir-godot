@@ -21,7 +21,7 @@ func get_min_tier() -> int:
 
 func execute(args: PackedStringArray, _piped_input: String = "") -> String:
 	if not is_available():
-		return "[color=red]plaso: requires %s rank to use[/color]" % ReputationManager.TIER_NAMES[get_min_tier()]
+		return "[color=red]plaso: requires %s rank to use[/color]" % TIER_NAMES[get_min_tier()]
 
 	if args.is_empty():
 		return "[color=red]Usage: plaso <evidence_dir> [-o output.csv]\nGenerates a forensic timeline from all evidence in the directory.[/color]"

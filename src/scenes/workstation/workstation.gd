@@ -167,7 +167,7 @@ func _execute_pipeline(pipeline: CommandParser.Pipeline) -> void:
 
 		if not cmd.is_available():
 			_print_line("[color=red]%s: requires %s rank to use[/color]" % [
-				parsed.name, ReputationManager.TIER_NAMES[cmd.get_min_tier()]
+				parsed.name, cmd.TIER_NAMES[cmd.get_min_tier()]
 			])
 			return
 

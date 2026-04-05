@@ -24,14 +24,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup export templates
+      - name: Setup Godot
         run: |
-          mkdir -p /root/.local/share/godot/export_templates/4.3.stable
-          mv /root/.local/share/godot/templates/4.3.stable/* /root/.local/share/godot/export_templates/4.3.stable/ || true
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          cp /root/.local/share/godot/templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+          if [ ! -d /root/.local/share/godot/export_templates/4.3.stable ]; then
+            mkdir -p /root/.local/share/godot/export_templates/4.3.stable
+            cp ~/.local/share/godot/export_templates/4.3.stable/* /root/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+          fi
+          ls -la /root/.local/share/godot/export_templates/4.3.stable/ || true
+          ls -la ~/.local/share/godot/export_templates/4.3.stable/ || true
 
       - name: Create export presets
         run: |
-          cat > export_presets.cfg << 'PRESET'
+          cat > export_presets.cfg << 'EOF'
           [preset.0]
 
           name="Web"
@@ -61,31 +67,48 @@ jobs:
           html/canvas_resize_policy=2
           html/focus_canvas_on_start=true
           html/experimental_virtual_keyboard=false
-          progressive_web_app/enabled=true
-          progressive_web_app/offline_page="offline.html"
+          progressive_web_app/enabled=false
+          progressive_web_app/offline_page=""
           progressive_web_app/display=1
           progressive_web_app/orientation=0
           progressive_web_app/icon_144x144=""
           progressive_web_app/icon_180x180=""
           progressive_web_app/icon_512x512=""
           progressive_web_app/background_color=Color(0.1, 0.1, 0.12, 1)
-          PRESET
+          EOF
+          sed -i 's/^          //' export_presets.cfg
+          echo "=== export_presets.cfg ==="
+          cat export_presets.cfg
+
+      - name: Import project
+        run: godot --headless --import 2>&1 || true
 
       - name: Export project
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" build/web/index.html 2>&1 || true
+          godot --headless --export-release "Web" build/web/index.html 2>&1
+          echo "=== Build output ==="
+          ls -la build/web/
 
-      - name: Add coi-serviceworker for SharedArrayBuffer
+      - name: Verify export
         run: |
-          # Required for threading support on GitHub Pages
-          cd build/web
-          cat > coi-serviceworker.js << 'COIJS'
-          if(typeof window==='undefined'){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI service worker registered:")).catch(console.error.bind(console,"COI service worker failed:"));}
-          COIJS
+          if [ ! -f build/web/index.html ]; then
+            echo "::error::Export failed - index.html not found"
+            echo "Trying debug export as fallback..."
+            godot --headless --export-debug "Web" build/web/index.html 2>&1 || true
+            ls -la build/web/ || true
+          fi
+          test -f build/web/index.html
 
-          # Inject coi-serviceworker into index.html
-          sed -i 's|<script |<script src="coi-serviceworker.js"></script>\n<script |' index.html || true
+      - name: Add COOP/COEP headers via service worker
+        run: |
+          cd build/web
+          cat > coi-serviceworker.js << 'SWEOF'
+          if(typeof window==='undefined'){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI SW registered:")).catch(console.error.bind(console,"COI SW failed:"));}
+          SWEOF
+          if [ -f index.html ]; then
+            sed -i 's|<script |<script src="coi-serviceworker.js"></script><script |' index.html
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

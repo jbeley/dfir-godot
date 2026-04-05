@@ -97,7 +97,7 @@ func get_min_tier() -> int:
 
 func execute(args: PackedStringArray, _piped_input: String = "") -> String:
 	if not is_available():
-		return "[color=red]hayabusa: requires %s rank[/color]" % ReputationManager.TIER_NAMES[get_min_tier()]
+		return "[color=red]hayabusa: requires %s rank[/color]" % TIER_NAMES[get_min_tier()]
 
 	if args.is_empty():
 		return _show_usage()

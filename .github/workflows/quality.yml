@@ -77,6 +77,15 @@ jobs:
           fi
           echo "All scripts compiled successfully"
 
+      - name: Run unit tests
+        run: |
+          godot --headless -s tests/run_tests.gd 2>&1 | tee test.log
+          if grep -q "FAILED" test.log; then
+            echo "::error::Unit tests failed"
+            exit 1
+          fi
+          echo "All tests passed"
+
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest

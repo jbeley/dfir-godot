@@ -35,9 +35,27 @@ func execute(args: PackedStringArray, piped_input: String = "") -> String:
 	return ""
 
 
+## Career tier names (duplicated here to avoid autoload dependency in tests).
+const TIER_NAMES: Array[String] = [
+	"Intern", "Junior Analyst", "Analyst", "Senior Analyst",
+	"Principal Analyst", "Team Lead", "Director",
+]
+
+
 ## Check if the player has the career tier to use this command.
 func is_available() -> bool:
-	return ReputationManager.career_tier >= get_min_tier()
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree and tree.root.has_node("/root/ReputationManager"):
+		var rep: Node = tree.root.get_node("/root/ReputationManager")
+		return rep.get("career_tier") >= get_min_tier()
+	return true  # Available in test/headless mode
+
+
+## Get the tier name for a given tier index.
+func get_tier_name(tier: int) -> String:
+	if tier >= 0 and tier < TIER_NAMES.size():
+		return TIER_NAMES[tier]
+	return "Unknown"
 
 
 ## Helper: read file content - from piped input or from a file path.
