@@ -96,14 +96,17 @@ func _load_case_dialogue() -> void:
 
 	# Load dialogue file
 	var dialogue_path := "res://assets/data/dialogue/panicked_ceo_ransomware.json"
-	if FileAccess.file_exists(dialogue_path):
+	if ResourceLoader.exists(dialogue_path):
 		var file := FileAccess.open(dialogue_path, FileAccess.READ)
-		var json := JSON.new()
-		if json.parse(file.get_as_text()) == OK:
-			_dialogue.load_dialogue(json.data)
-			_dialogue.start("start")
+		if file:
+			var json := JSON.new()
+			if json.parse(file.get_as_text()) == OK:
+				_dialogue.load_dialogue(json.data)
+				_dialogue.start("start")
+			else:
+				_show_generic_dialogue()
 		else:
-			_show_error("Failed to parse dialogue file")
+			_show_generic_dialogue()
 	else:
 		_show_generic_dialogue()
 

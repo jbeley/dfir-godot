@@ -6,6 +6,7 @@ extends Node2D
 @onready var day_night: CanvasModulate = $DayNightModulate
 @onready var interaction_label: Label = $UI/InteractionLabel
 @onready var notification_label: Label = $UI/NotificationLabel
+@onready var notification_bg: ColorRect = $UI/NotificationBG
 @onready var floor_rect: ColorRect = $Floor
 @onready var wall_bg: ColorRect = $WallBG
 @onready var wall_trim: ColorRect = $WallTrim
@@ -52,6 +53,8 @@ func _process(delta: float) -> void:
 		_notification_timer -= delta
 		if _notification_timer <= 0:
 			notification_label.visible = false
+			if notification_bg:
+				notification_bg.visible = false
 
 
 func _setup_hotspots() -> void:
@@ -136,6 +139,8 @@ func _on_tutorial_hint(text: String) -> void:
 func _show_notification(text: String, duration: float = 3.0) -> void:
 	notification_label.text = text
 	notification_label.visible = true
+	if notification_bg:
+		notification_bg.visible = true
 	_notification_timer = duration
 
 

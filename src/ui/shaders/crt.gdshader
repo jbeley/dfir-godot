@@ -6,23 +6,21 @@ uniform float curvature : hint_range(0.0, 0.1) = 0.02;
 uniform float vignette_intensity : hint_range(0.0, 1.0) = 0.3;
 uniform float brightness : hint_range(0.8, 1.5) = 1.1;
 uniform float flicker : hint_range(0.0, 0.05) = 0.01;
-uniform vec3 phosphor_tint = vec3(0.9, 1.0, 0.85); // Slight green tint
+uniform vec3 phosphor_tint = vec3(0.9, 1.0, 0.85);
 
 void fragment() {
-	vec2 uv = SCREEN_UV;
+	vec2 uv = UV;
 
 	// Barrel distortion (CRT curvature)
 	vec2 centered = uv - 0.5;
 	float dist = dot(centered, centered);
 	uv = uv + centered * dist * curvature;
 
-	// Clamp to screen bounds
-	if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-		COLOR = vec4(0.0, 0.0, 0.0, 1.0);
-		return;
-	}
+	// Clamp UV - no return, just set black for out-of-bounds
+	float in_bounds = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+	uv = clamp(uv, vec2(0.0), vec2(1.0));
 
-	// Sample the screen texture
+	// Sample the texture
 	vec4 col = texture(TEXTURE, uv);
 
 	// Scanlines
@@ -41,6 +39,9 @@ void fragment() {
 	// Vignette (darker edges)
 	float vignette = 1.0 - dist * vignette_intensity * 4.0;
 	col.rgb *= vignette;
+
+	// Black out-of-bounds pixels
+	col.rgb *= in_bounds;
 
 	COLOR = col;
 }
