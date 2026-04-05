@@ -40,7 +40,8 @@ var timeline_entries: Array[TimelineEvent] = []
 
 
 func get_hours_remaining() -> float:
-	return deadline_hours - (TimeManager.get_total_hours() - start_hour)
+	var current_hours := _get_time_hours()
+	return deadline_hours - (current_hours - start_hour)
 
 
 func is_overdue() -> bool:
@@ -49,4 +50,11 @@ func is_overdue() -> bool:
 
 func activate() -> void:
 	status = Status.ACTIVE
-	start_hour = TimeManager.get_total_hours()
+	start_hour = _get_time_hours()
+
+
+func _get_time_hours() -> float:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree and tree.root.has_node("/root/TimeManager"):
+		return tree.root.get_node("/root/TimeManager").call("get_total_hours")
+	return 0.0

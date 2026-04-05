@@ -28,7 +28,7 @@ func execute(args: PackedStringArray, _piped_input: String = "") -> String:
 			var output := "[color=yellow]%s[/color] - %s\n" % [cmd.get_name(), cmd.get_description()]
 			output += "Usage: %s\n" % cmd.get_usage()
 			if not cmd.is_available():
-				output += "[color=red]Locked - requires %s rank[/color]\n" % ReputationManager.TIER_NAMES[cmd.get_min_tier()]
+				output += "[color=red]Locked - requires %s rank[/color]\n" % cmd.TIER_NAMES[cmd.get_min_tier()]
 			return output
 		return "[color=red]Unknown command: %s[/color]" % cmd_name
 
