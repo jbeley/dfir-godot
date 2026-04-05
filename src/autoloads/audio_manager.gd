@@ -12,15 +12,15 @@ var sfx_volume_db: float = 0.0
 
 func _ready() -> void:
 	music_player = AudioStreamPlayer.new()
-	music_player.bus = "Music"
+	music_player.bus = &"Master"
 	add_child(music_player)
 
 	crossfade_player = AudioStreamPlayer.new()
-	crossfade_player.bus = "Music"
+	crossfade_player.bus = &"Master"
 	add_child(crossfade_player)
 
 	sfx_player = AudioStreamPlayer.new()
-	sfx_player.bus = "SFX"
+	sfx_player.bus = &"Master"
 	add_child(sfx_player)
 
 
@@ -68,7 +68,7 @@ func play_sfx(stream: AudioStream) -> void:
 ## Play a one-shot SFX without interrupting the current SFX.
 func play_sfx_oneshot(stream: AudioStream) -> void:
 	var player := AudioStreamPlayer.new()
-	player.bus = "SFX"
+	player.bus = &"Master"
 	player.stream = stream
 	player.volume_db = sfx_volume_db
 	add_child(player)
