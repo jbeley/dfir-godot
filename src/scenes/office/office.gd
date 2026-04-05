@@ -73,7 +73,10 @@ func _on_hotspot_exited(body: Node2D, hotspot: Area2D) -> void:
 func _get_hotspot_prompt(hotspot_name: String) -> String:
 	match hotspot_name:
 		"Desk": return "[E] Sit at workstation"
-		"Phone": return "[E] Check email"
+		"Phone":
+			if CaseManager.get_active_case_count() > 0:
+				return "[E] Call client"
+			return "[E] Check email"
 		"EvidenceBoard": return "[E] Evidence board"
 		"Bed": return "[E] Sleep"
 		"Coffee": return "[E] Make coffee"
@@ -108,7 +111,10 @@ func _on_player_interact(target: Node2D) -> void:
 			if cat_node and cat_node.has_method("pet"):
 				cat_node.pet()
 		"Phone":
-			GameManager.change_scene("res://src/scenes/email/email_client.tscn")
+			if CaseManager.get_active_case_count() > 0:
+				GameManager.change_scene("res://src/scenes/dialogue/dialogue_scene.tscn")
+			else:
+				GameManager.change_scene("res://src/scenes/email/email_client.tscn")
 
 
 func _on_interruption(interruption: Dictionary) -> void:

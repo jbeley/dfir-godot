@@ -1,0 +1,176 @@
+[
+  {
+    "id": "start",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Oh thank God you're here! Everything is encrypted! The whole network! We can't access ANYTHING!",
+    "choices": [
+      {"text": "Take a deep breath, Dave. Walk me through what happened.", "next": "calm_response", "trust_change": 2.0, "tone": "empathetic"},
+      {"text": "When did you first notice the encryption?", "next": "timeline_q", "trust_change": 1.0, "tone": "technical"},
+      {"text": "Has anyone paid the ransom?", "next": "ransom_q", "trust_change": 0.0, "tone": "neutral"}
+    ]
+  },
+  {
+    "id": "calm_response",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "OK, OK... so my plant manager called me at 5:47 AM. Said all the files on the shared drive had weird extensions. Then he found a note demanding Bitcoin.",
+    "choices": [
+      {"text": "Do you still have that ransom note? I'll need to see it.", "next": "ransom_note", "trust_change": 1.0, "tone": "technical"},
+      {"text": "Has anyone touched the systems since then?", "next": "contamination", "trust_change": 1.0, "tone": "technical"},
+      {"text": "How many machines are affected?", "next": "scope", "trust_change": 0.0, "tone": "neutral"}
+    ]
+  },
+  {
+    "id": "timeline_q",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Uh, my plant manager noticed around 5:47 this morning. But honestly, I don't know when it actually started. Could've been overnight for all I know.",
+    "choices": [
+      {"text": "That's helpful. Overnight attacks are common. Did you have anyone working late last night?", "next": "overnight", "trust_change": 1.0, "tone": "empathetic"},
+      {"text": "We'll need to check the event logs to determine the actual timeline.", "next": "logs_request", "trust_change": 0.0, "tone": "technical"}
+    ]
+  },
+  {
+    "id": "ransom_q",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "NO! My lawyer said absolutely not. But... the ransom is 2 Bitcoin. That's what, like $80,000? Our manufacturing line is losing $50,000 a DAY being down...",
+    "choices": [
+      {"text": "I strongly advise against paying. There's no guarantee they'll decrypt, and it funds more attacks.", "next": "no_pay_advice", "trust_change": 2.0, "tone": "empathetic"},
+      {"text": "Let's focus on the investigation first. We may be able to recover without paying.", "next": "recovery_hope", "trust_change": 1.0, "tone": "neutral"},
+      {"text": "That's between you and your lawyer. My job is to find out how they got in.", "next": "cold_response", "trust_change": -1.0, "tone": "aggressive"}
+    ]
+  },
+  {
+    "id": "contamination",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Well... our IT guy, Mike, he rebooted the file server and the domain controller. He said he was 'trying to fix it.' I told him to stop touching things after your firm said to preserve everything.",
+    "trust_change": -1.0,
+    "reveals_evidence": "ev_security_evtx",
+    "choices": [
+      {"text": "That's unfortunate but not uncommon. We can still work with what's there. Did Mike do anything else?", "next": "mike_actions", "trust_change": 1.0, "tone": "empathetic"},
+      {"text": "Rebooting may have destroyed volatile memory evidence. We need to talk to Mike directly.", "next": "mike_interview", "trust_change": 0.0, "tone": "technical"}
+    ]
+  },
+  {
+    "id": "scope",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "I think... all of them? At least the file server and a bunch of workstations. Maybe 15-20 machines? We have about 50 employees. Our email still works because it's Office 365.",
+    "choices": [
+      {"text": "Small silver lining on the email. Can you get me a network diagram?", "next": "network_info", "trust_change": 1.0, "tone": "technical"},
+      {"text": "We'll need to check each machine. Do you have an IT inventory?", "next": "inventory_q", "trust_change": 0.0, "tone": "technical"}
+    ]
+  },
+  {
+    "id": "overnight",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "No, everyone leaves by 6 PM usually. But... actually, John in accounting said he got a weird email yesterday about an invoice. He might have clicked something. Oh God.",
+    "trust_change": 1.0,
+    "reveals_evidence": "ev_phishing_email",
+    "choices": [
+      {"text": "That's very helpful. Can you get me access to John's email and workstation?", "next": "john_access", "trust_change": 2.0, "tone": "technical"},
+      {"text": "Don't panic. Phishing is the most common initial access vector. We'll check it out.", "next": "reassure", "trust_change": 1.0, "tone": "empathetic"}
+    ]
+  },
+  {
+    "id": "ransom_note",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Yeah, it's on every encrypted machine. Says 'DarkLock' something. Wants 2 Bitcoin sent to some wallet address. Gives us 72 hours or the price doubles.",
+    "reveals_evidence": "ev_ransom_note",
+    "next": "evidence_shared"
+  },
+  {
+    "id": "no_pay_advice",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "You're right, you're right. My lawyer said the same thing. Just... please find out how they got in so this doesn't happen again. I can't go through this twice.",
+    "next": "commitment"
+  },
+  {
+    "id": "recovery_hope",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Really? You think we can recover without paying? That would be... that would be amazing. What do you need from us?",
+    "trust_change": 1.0,
+    "next": "access_request"
+  },
+  {
+    "id": "cold_response",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "...",
+    "trust_change": -2.0,
+    "next": "access_request"
+  },
+  {
+    "id": "mike_actions",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "He said he ran some antivirus scan thing but it didn't find anything. Then he 'restored from backup' but the backup was encrypted too. Poor guy, he's been up since 5 AM.",
+    "next": "evidence_shared"
+  },
+  {
+    "id": "mike_interview",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Sure, I'll get him on a call. He's... he's pretty shaken up. He keeps saying 'I should have had better backups.' He's blaming himself.",
+    "trust_change": 1.0,
+    "next": "evidence_shared"
+  },
+  {
+    "id": "john_access",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Absolutely. Whatever you need. I'll tell everyone to cooperate fully. Just... find the bastards who did this.",
+    "trust_change": 2.0,
+    "next": "evidence_shared"
+  },
+  {
+    "id": "reassure",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "OK. OK, I feel a little better knowing this is... normal? Is that the right word? God, that's depressing that this is normal.",
+    "trust_change": 1.0,
+    "next": "evidence_shared"
+  },
+  {
+    "id": "network_info",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Network diagram? Uh... I don't think we have one. Mike might know the setup. We have a file server, a domain controller, and a web server that hosts our company website.",
+    "next": "access_request"
+  },
+  {
+    "id": "inventory_q",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "IT inventory? Like a spreadsheet of all our computers? I... don't think we have that. Mike might have something on a sticky note somewhere.",
+    "next": "access_request"
+  },
+  {
+    "id": "logs_request",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Event logs? I don't know what those are. You'll have to talk to Mike about the technical stuff. I can get you remote access to the network.",
+    "next": "access_request"
+  },
+  {
+    "id": "access_request",
+    "speaker": "You",
+    "text": "I'll need VPN access to your network, admin credentials for the affected systems, and any logs from your firewall. Can you arrange that?",
+    "next": "access_granted"
+  },
+  {
+    "id": "access_granted",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Done. I'll have Mike send you everything. Just... keep me updated, OK? My board is meeting tomorrow and they're going to want answers.",
+    "trust_change": 1.0,
+    "next": "end"
+  },
+  {
+    "id": "evidence_shared",
+    "speaker": "You",
+    "text": "Good. I have enough to start. I'll begin analyzing the evidence and get back to you with initial findings.",
+    "next": "wrap_up"
+  },
+  {
+    "id": "wrap_up",
+    "speaker": "Dave Morrison (CEO)",
+    "text": "Thank you. Seriously. I haven't slept since 5 AM and my wife is going to kill me if I don't come home soon. Call me anytime - literally anytime - if you find something.",
+    "trust_change": 1.0,
+    "next": "end"
+  },
+  {
+    "id": "commitment",
+    "speaker": "You",
+    "text": "That's exactly what we're here for. Let me start the investigation. I'll have preliminary findings within a few hours.",
+    "next": "end"
+  }
+]
