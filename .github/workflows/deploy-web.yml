@@ -24,93 +24,87 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug template locations
+      - name: Setup templates
         run: |
-          echo "=== Finding export templates ==="
-          find / -name "web_*" -o -name "webassembly_*" 2>/dev/null | head -20
-          find / -path "*/export_templates/*" -type d 2>/dev/null | head -10
-          echo "=== Godot version ==="
-          godot --version 2>/dev/null || true
+          # barichello/godot-ci puts templates in /github/home
+          # but godot looks in $HOME which may differ in containers
+          TEMPLATE_DIR="/github/home/.local/share/godot/export_templates/4.3.stable"
+          echo "Templates in image:"
+          ls -la "$TEMPLATE_DIR/" | grep web || echo "No web templates found"
+
+          # Copy debug template as release template (release is missing in this image)
+          if [ -f "$TEMPLATE_DIR/web_nothreads_debug.zip" ] && [ ! -f "$TEMPLATE_DIR/web_nothreads_release.zip" ]; then
+            echo "Copying debug template as release fallback"
+            cp "$TEMPLATE_DIR/web_nothreads_debug.zip" "$TEMPLATE_DIR/web_nothreads_release.zip"
+          fi
+          if [ -f "$TEMPLATE_DIR/web_debug.zip" ] && [ ! -f "$TEMPLATE_DIR/web_release.zip" ]; then
+            cp "$TEMPLATE_DIR/web_debug.zip" "$TEMPLATE_DIR/web_release.zip"
+          fi
+
+          # Also ensure HOME-relative path works
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          cp "$TEMPLATE_DIR"/* "$HOME/.local/share/godot/export_templates/4.3.stable/" 2>/dev/null || true
+          echo "Final templates:"
+          ls -la "$HOME/.local/share/godot/export_templates/4.3.stable/" | grep web
 
       - name: Create export presets
         shell: bash
         run: |
-          cat > export_presets.cfg << 'HEREDOC'
-          [preset.0]
-
-          name="Web"
-          platform="Web"
-          runnable=true
-          dedicated_server=false
-          custom_features=""
-          export_filter="all_resources"
-          include_filter=""
-          exclude_filter=""
-          export_path="build/web/index.html"
-          encryption_include_filters=""
-          encryption_exclude_filters=""
-          encrypt_pck=false
-          encrypt_directory=false
-
-          [preset.0.options]
-
-          custom_template/debug=""
-          custom_template/release=""
-          variant/extensions_support=false
-          vram_texture_compression/for_desktop=true
-          vram_texture_compression/for_mobile=false
-          html/export_icon=true
-          html/custom_html_shell=""
-          html/head_include=""
-          html/canvas_resize_policy=2
-          html/focus_canvas_on_start=true
-          html/experimental_virtual_keyboard=false
-          progressive_web_app/enabled=false
-          HEREDOC
-          # Strip leading whitespace from heredoc
-          sed -i 's/^          //' export_presets.cfg
-          echo "=== Generated export_presets.cfg ==="
-          cat -A export_presets.cfg | head -30
+          # Write export_presets.cfg with no leading whitespace
+          printf '%s\n' \
+            '[preset.0]' \
+            '' \
+            'name="Web"' \
+            'platform="Web"' \
+            'runnable=true' \
+            'dedicated_server=false' \
+            'custom_features=""' \
+            'export_filter="all_resources"' \
+            'include_filter=""' \
+            'exclude_filter=""' \
+            'export_path="build/web/index.html"' \
+            'encryption_include_filters=""' \
+            'encryption_exclude_filters=""' \
+            'encrypt_pck=false' \
+            'encrypt_directory=false' \
+            '' \
+            '[preset.0.options]' \
+            '' \
+            'custom_template/debug=""' \
+            'custom_template/release=""' \
+            'variant/extensions_support=false' \
+            'vram_texture_compression/for_desktop=true' \
+            'vram_texture_compression/for_mobile=false' \
+            'html/export_icon=true' \
+            'html/custom_html_shell=""' \
+            'html/head_include=""' \
+            'html/canvas_resize_policy=2' \
+            'html/focus_canvas_on_start=true' \
+            'html/experimental_virtual_keyboard=false' \
+            'progressive_web_app/enabled=false' \
+            > export_presets.cfg
+          echo "=== export_presets.cfg ==="
+          cat export_presets.cfg
 
       - name: Import project
-        run: |
-          godot --headless --import 2>&1 | tail -5
-          echo "Import done"
+        run: godot --headless --import 2>&1 | tail -5
 
       - name: Export web build
         run: |
           mkdir -p build/web
-          echo "=== Attempting release export ==="
-          godot --headless --export-release "Web" build/web/index.html 2>&1 || true
-          echo "=== Checking build output ==="
-          ls -la build/web/ || true
-          if [ ! -f build/web/index.html ]; then
-            echo "Release export failed, trying debug export..."
-            godot --headless --export-debug "Web" build/web/index.html 2>&1 || true
-            ls -la build/web/ || true
-          fi
-          if [ ! -f build/web/index.html ]; then
-            echo "::error::Both export attempts failed"
-            echo "=== Checking for export template issues ==="
-            find / -name "*.wasm" 2>/dev/null | head -5
-            exit 1
-          fi
-          echo "=== Export successful ==="
+          godot --headless --export-release "Web" build/web/index.html 2>&1
+          echo "=== Build output ==="
           ls -lh build/web/
+          test -f build/web/index.html || { echo "::error::Export failed - no index.html"; exit 1; }
 
       - name: Add cross-origin isolation
-        if: success()
         run: |
           cd build/web
-          cat > coi-serviceworker.js << 'EOFSW'
-          if(typeof window==='undefined'){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI SW OK:")).catch(console.error.bind(console,"COI SW fail:"));}
-          EOFSW
+          printf '%s' 'if(typeof window==="undefined"){self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));self.addEventListener("fetch",function(e){if(e.request.cache==="only-if-cached"&&e.request.mode!=="same-origin")return;e.respondWith(fetch(e.request).then(r=>{const h=new Headers(r.headers);h.set("Cross-Origin-Embedder-Policy","credentialless");h.set("Cross-Origin-Opener-Policy","same-origin");return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}).catch(e=>console.error(e)));})}else{const r=navigator.serviceWorker.register(window.document.currentScript.src);r.then(console.log.bind(console,"COI OK:")).catch(console.error.bind(console,"COI fail:"));}' > coi-serviceworker.js
           sed -i 's|<script |<script src="coi-serviceworker.js"></script><script |' index.html
-          echo "=== Final build contents ==="
           ls -lh .
 
       - name: Upload pages artifact
-        if: success()
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
