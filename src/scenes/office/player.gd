@@ -46,8 +46,14 @@ func _physics_process(delta: float) -> void:
 		sprite.frame = _facing * 4 + _anim_frame
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact") and nearby_interactable:
+var _interact_cooldown: float = 0.0
+
+func _process(delta: float) -> void:
+	if _interact_cooldown > 0:
+		_interact_cooldown -= delta
+	# Poll for interact action (works with both keyboard and touch Input.action_press)
+	if Input.is_action_just_pressed("interact") and nearby_interactable and _interact_cooldown <= 0:
+		_interact_cooldown = 0.5
 		interacted_with.emit(nearby_interactable)
 
 
