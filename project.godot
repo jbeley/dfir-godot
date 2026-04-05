@@ -103,6 +103,10 @@ tab_prev={
 ]
 }
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [debug]
 
 gdscript/warnings/infer_type_from_variant=0
