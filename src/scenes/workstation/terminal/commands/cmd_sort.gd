@@ -45,7 +45,7 @@ func execute(args: PackedStringArray, piped_input: String = "") -> String:
 	var lines := Array(text.split("\n"))
 
 	# Remove empty trailing lines
-	while not lines.is_empty() and lines[-1].strip_edges() == "":
+	while not lines.is_empty() and str(lines[-1]).strip_edges() == "":
 		lines.pop_back()
 
 	if numeric:
