@@ -58,24 +58,32 @@ func _process(delta: float) -> void:
 
 
 func _setup_hotspots() -> void:
-	for hotspot: Node in get_tree().get_nodes_in_group("hotspots"):
-		if hotspot is Area2D:
-			hotspot.body_entered.connect(_on_hotspot_entered.bind(hotspot))
-			hotspot.body_exited.connect(_on_hotspot_exited.bind(hotspot))
+	# Use player's InteractArea (Area2D with radius 28) to detect hotspots.
+	# This bypasses physics collision - the interact circle just needs to
+	# touch the hotspot, not the player's body.
+	var interact_area: Area2D = player.get_node_or_null("InteractArea")
+	if interact_area == null:
+		push_error("Player has no InteractArea")
+		return
+	interact_area.area_entered.connect(_on_interact_area_entered)
+	interact_area.area_exited.connect(_on_interact_area_exited)
 
 
-func _on_hotspot_entered(body: Node2D, hotspot: Area2D) -> void:
-	if body == player:
-		current_hotspot = hotspot.name
-		player.set_nearby_interactable(hotspot)
-		interaction_label.text = _get_hotspot_prompt(hotspot.name)
-		interaction_label.visible = true
+func _on_interact_area_entered(area: Area2D) -> void:
+	if not area.is_in_group("hotspots"):
+		return
+	current_hotspot = area.name
+	player.set_nearby_interactable(area)
+	interaction_label.text = _get_hotspot_prompt(area.name)
+	interaction_label.visible = true
 
 
-func _on_hotspot_exited(body: Node2D, hotspot: Area2D) -> void:
-	if body == player and current_hotspot == hotspot.name:
+func _on_interact_area_exited(area: Area2D) -> void:
+	if not area.is_in_group("hotspots"):
+		return
+	if current_hotspot == area.name:
 		current_hotspot = ""
-		player.clear_nearby_interactable(hotspot)
+		player.clear_nearby_interactable(area)
 		interaction_label.visible = false
 
 
