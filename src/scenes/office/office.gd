@@ -5,6 +5,7 @@ extends Node2D
 @onready var player: CharacterBody2D = $Player
 @onready var day_night: CanvasModulate = $DayNightModulate
 @onready var interaction_label: Label = $UI/InteractionLabel
+@onready var interaction_bg: ColorRect = $UI/InteractionBG
 @onready var notification_label: Label = $UI/NotificationLabel
 @onready var notification_bg: ColorRect = $UI/NotificationBG
 @onready var floor_rect: ColorRect = $Floor
@@ -15,6 +16,7 @@ extends Node2D
 var current_hotspot: String = ""
 var _hud: Node = null
 var _pause_menu: Control = null
+var _highlight_node: Node2D = null
 var _notification_timer: float = 0.0
 
 
@@ -76,6 +78,10 @@ func _on_interact_area_entered(area: Area2D) -> void:
 	player.set_nearby_interactable(area)
 	interaction_label.text = _get_hotspot_prompt(area.name)
 	interaction_label.visible = true
+	if interaction_bg:
+		interaction_bg.visible = true
+	_show_hotspot_highlight(area)
+	SfxBank.play("menu_move")
 
 
 func _on_interact_area_exited(area: Area2D) -> void:
@@ -85,6 +91,38 @@ func _on_interact_area_exited(area: Area2D) -> void:
 		current_hotspot = ""
 		player.clear_nearby_interactable(area)
 		interaction_label.visible = false
+		if interaction_bg:
+			interaction_bg.visible = false
+		_hide_hotspot_highlight()
+
+
+func _show_hotspot_highlight(area: Area2D) -> void:
+	_hide_hotspot_highlight()
+	_highlight_node = Sprite2D.new()
+	_highlight_node.position = area.global_position
+	_highlight_node.modulate = Color(1, 1, 0.4, 0.6)
+	# Use a simple colored circle drawn via a line2D pulsing
+	var line := Line2D.new()
+	line.width = 2.0
+	line.default_color = Color(1, 1, 0.3, 0.8)
+	var pts := PackedVector2Array()
+	var radius := 22.0
+	for i in range(33):
+		var angle: float = i * TAU / 32.0
+		pts.append(Vector2(cos(angle), sin(angle)) * radius)
+	line.points = pts
+	_highlight_node.add_child(line)
+	add_child(_highlight_node)
+	# Pulse animation
+	var tween := create_tween().set_loops()
+	tween.tween_property(_highlight_node, "modulate:a", 0.3, 0.5)
+	tween.tween_property(_highlight_node, "modulate:a", 0.9, 0.5)
+
+
+func _hide_hotspot_highlight() -> void:
+	if _highlight_node and is_instance_valid(_highlight_node):
+		_highlight_node.queue_free()
+	_highlight_node = null
 
 
 func _get_hotspot_prompt(hotspot_name: String) -> String:

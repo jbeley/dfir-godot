@@ -62,7 +62,9 @@ func _update_case_count() -> void:
 
 
 func _update_stats() -> void:
-	stats_label.text = "F:%.0f E:%.0f S:%.0f" % [
+	stats_label.text = "%s | Rep:%.0f | F:%.0f E:%.0f S:%.0f" % [
+		ReputationManager.get_tier_name(),
+		ReputationManager.reputation,
 		ReputationManager.focus,
 		ReputationManager.energy,
 		ReputationManager.stress,

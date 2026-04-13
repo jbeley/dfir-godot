@@ -178,18 +178,26 @@ shape = SubResource("shape_vwall")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
+[node name="InteractionBG" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -90.0
+offset_top = 200.0
+offset_right = 90.0
+offset_bottom = 220.0
+color = Color(0.05, 0.1, 0.2, 0.85)
+
 [node name="InteractionLabel" type="Label" parent="UI"]
 visible = false
-anchors_preset = 7
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -24.0
-offset_right = 80.0
-grow_horizontal = 2
-grow_vertical = 0
+offset_left = -88.0
+offset_top = 201.0
+offset_right = 88.0
+offset_bottom = 219.0
 text = "[E] Interact"
 horizontal_alignment = 1
 
