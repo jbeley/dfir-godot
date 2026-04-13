@@ -98,7 +98,7 @@ texture_filter = 0
 texture = ExtResource("6_coffee")
 
 [node name="Phone" type="Sprite2D" parent="Furniture"]
-position = Vector2(400, 62)
+position = Vector2(200, 230)
 texture_filter = 0
 texture = ExtResource("7_phone")
 
@@ -153,7 +153,7 @@ position = Vector2(55, 185)
 shape = SubResource("shape_coffee")
 
 [node name="Phone" type="Area2D" parent="Hotspots" groups=["hotspots"]]
-position = Vector2(400, 62)
+position = Vector2(200, 230)
 
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Phone"]
 shape = SubResource("shape_phone")
@@ -184,10 +184,10 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -90.0
-offset_top = 200.0
+offset_top = 180.0
 offset_right = 90.0
-offset_bottom = 220.0
-color = Color(0.05, 0.1, 0.2, 0.85)
+offset_bottom = 198.0
+color = Color(0.05, 0.1, 0.25, 0.9)
 
 [node name="InteractionLabel" type="Label" parent="UI"]
 visible = false
@@ -195,9 +195,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -88.0
-offset_top = 201.0
+offset_top = 181.0
 offset_right = 88.0
-offset_bottom = 219.0
+offset_bottom = 197.0
 text = "[E] Interact"
 horizontal_alignment = 1
 

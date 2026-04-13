@@ -92,7 +92,7 @@ func get_usage() -> String:
 
 
 func get_min_tier() -> int:
-	return 1  # Junior Analyst
+	return 0  # Intern - needed for tutorial case
 
 
 func execute(args: PackedStringArray, _piped_input: String = "") -> String:
