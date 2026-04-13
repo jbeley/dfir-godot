@@ -80,11 +80,26 @@ specialists. Solo-keyboard-hero framing is rejected.
 
 ### Team gameplay mechanics (all three coexist)
 
+Task assignment supports **three input methods, all available simultaneously**:
+terminal commands (`page dana`, `assign dana evtx-triage DC01`), click-the-
+teammate menus in the Teams pane, and natural-language messages in the
+Teams input box (`@dana pull sysmon from DC01`). Power users live in the
+terminal; new players discover via menus; roleplay-inclined players write
+messages. All three resolve to the same underlying `TeamManager.assign_task`
+call.
+
 1. **Task assignment / async.** "Dana, pull Sysmon from the DCs." Results
    come back after in-game time. Specialists do specialist work.
-2. **Autonomous Slack chatter.** Teammates proactively message findings,
-   ask questions, disagree with each other. The player reads/reacts. Slack
-   war room atmosphere.
+2. **Autonomous Teams chatter.** Teammates proactively message findings,
+   ask questions, disagree with each other. The player reads/reacts.
+   Microsoft Teams war-room atmosphere — yes, Teams, not Slack. Enterprise
+   DFIR lives in Teams, and Teams' particular corporate soullessness pairs
+   naturally with the dry-workplace tone. Presented in-game via a
+   **dockable widget with unread-count badge** that expands in-place.
+   Chatter pacing is **event-driven + thin ambient**: teammates post when
+   the player runs a meaningful command, finds an IOC, crosses a time
+   threshold, or hits a case milestone, with a light background layer of
+   ambient bickering on a 3–5 minute cadence during active cases.
 3. **Pair-programming handoff.** Player can hand the terminal to a
    specialist for sub-tasks they're better at. They narrate and solve;
    player gets the output. Highlights specialty differentiation.
@@ -97,7 +112,7 @@ specialists. Solo-keyboard-hero framing is rejected.
 - **Burnout & on-call hell.** Sleep trading, 4am typos, competence under
   duress. Maps onto the existing Focus/Energy/Stress stats.
 - **Generational/culture gap.** Old-school (EnCase, ticket-everything) vs
-  new-school (Velociraptor, Slack-first, LLM-curious) tooling wars.
+  new-school (Velociraptor, Teams-first, LLM-curious) tooling wars.
 
 We are deliberately **not** leaning on firm politics / billing nonsense as
 a primary comedy engine. Comedy is about the work and the people doing it.
