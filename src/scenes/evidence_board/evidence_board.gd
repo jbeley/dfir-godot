@@ -40,6 +40,12 @@ func _on_back() -> void:
 	GameManager.change_scene("res://src/scenes/office/office.tscn")
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause_game") or event.is_action_pressed("ui_cancel"):
+		_on_back()
+		get_viewport().set_input_as_handled()
+
+
 func _on_add_ioc() -> void:
 	var value := ioc_value_input.text.strip_edges()
 	if value == "":
