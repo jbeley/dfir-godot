@@ -49,6 +49,12 @@ func _on_back() -> void:
 	GameManager.change_scene("res://src/scenes/main_menu/main_menu.tscn")
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause_game") or event.is_action_pressed("ui_cancel"):
+		_on_back()
+		get_viewport().set_input_as_handled()
+
+
 func _save_settings() -> void:
 	var data := {
 		"music_volume": music_slider.value,

@@ -57,6 +57,10 @@ func _process(delta: float) -> void:
 			notification_label.visible = false
 			if notification_bg:
 				notification_bg.visible = false
+	# Pulse the hotspot highlight
+	if _highlight_node and is_instance_valid(_highlight_node):
+		var pulse: float = 0.4 + 0.5 * (sin(Time.get_ticks_msec() / 200.0) * 0.5 + 0.5)
+		_highlight_node.modulate = Color(1, 1, 0.5, pulse)
 
 
 func _setup_hotspots() -> void:
@@ -98,10 +102,9 @@ func _on_interact_area_exited(area: Area2D) -> void:
 
 func _show_hotspot_highlight(area: Area2D) -> void:
 	_hide_hotspot_highlight()
-	_highlight_node = Sprite2D.new()
+	_highlight_node = Node2D.new()
 	_highlight_node.position = area.global_position
-	_highlight_node.modulate = Color(1, 1, 0.4, 0.6)
-	# Use a simple colored circle drawn via a line2D pulsing
+	# Draw a circle via Line2D
 	var line := Line2D.new()
 	line.width = 2.0
 	line.default_color = Color(1, 1, 0.3, 0.8)
@@ -113,10 +116,6 @@ func _show_hotspot_highlight(area: Area2D) -> void:
 	line.points = pts
 	_highlight_node.add_child(line)
 	add_child(_highlight_node)
-	# Pulse animation
-	var tween := create_tween().set_loops()
-	tween.tween_property(_highlight_node, "modulate:a", 0.3, 0.5)
-	tween.tween_property(_highlight_node, "modulate:a", 0.9, 0.5)
 
 
 func _hide_hotspot_highlight() -> void:
