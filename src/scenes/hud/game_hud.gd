@@ -45,7 +45,7 @@ func _on_deadline_warning(_case_data: Resource, hours_remaining: float) -> void:
 	_show_notification("DEADLINE: %.0f hours remaining!" % hours_remaining)
 
 
-func _on_promoted(new_tier: int, tier_name: String) -> void:
+func _on_promoted(_new_tier: int, tier_name: String) -> void:
 	_show_notification("PROMOTED: %s!" % tier_name)
 
 

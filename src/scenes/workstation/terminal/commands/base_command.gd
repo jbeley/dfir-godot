@@ -31,7 +31,8 @@ func get_min_tier() -> int:
 
 ## Execute the command. Returns output as a string.
 ## If piped_input is non-empty, it's the output from the previous command in the pipe.
-func execute(args: PackedStringArray, piped_input: String = "") -> String:
+## Subclasses override this and use the args and piped_input parameters.
+func execute(_args: PackedStringArray, _piped_input: String = "") -> String:
 	return ""
 
 

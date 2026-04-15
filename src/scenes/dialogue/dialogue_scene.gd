@@ -197,6 +197,6 @@ func _on_trust_changed(amount: float) -> void:
 				case_data.client.trust_level = (case_data.client.trust_level + 1) as ClientData.TrustLevel
 
 
-func _on_evidence_revealed(evidence_id: String) -> void:
+func _on_evidence_revealed(_evidence_id: String) -> void:
 	# Evidence is already mounted but we can show a notification
 	pass

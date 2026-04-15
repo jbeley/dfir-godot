@@ -123,7 +123,6 @@ def beat_duration():
 def make_chill_investigation():
     """Lo-fi chiptune for calm investigation. 16 bars, loops."""
     beat = beat_duration()
-    bar = beat * 4
 
     # Chord progression: Am - F - C - G (lo-fi staple)
     chords = [

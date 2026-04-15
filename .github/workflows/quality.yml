@@ -15,45 +15,68 @@ jobs:
     name: Semgrep SAST
     runs-on: ubuntu-latest
     container:
-      image: semgrep/semgrep
+      image: semgrep/semgrep:1.96.0
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Semgrep
-        run: semgrep scan --config auto --config p/security-audit --config p/owasp-top-ten --error --json --output semgrep-results.json . || true
+      - name: Run Semgrep (registry configs)
+        run: |
+          semgrep scan \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --error \
+            --metrics=off \
+            --json \
+            --output semgrep-results.json \
+            .
+
+      - name: Run Semgrep (custom GDScript ruleset)
+        run: |
+          # GDScript is not natively supported by Semgrep; we ship a
+          # generic-mode ruleset under .semgrep/gdscript.yml that scans
+          # .gd files for OS.execute abuse, load() concat, hardcoded
+          # credentials, and Expression.parse with user input.
+          semgrep scan \
+            --config .semgrep/gdscript.yml \
+            --error \
+            --metrics=off \
+            src/ tests/
 
       - name: Upload Semgrep results
         if: always()
-        run: |
-          if [ -f semgrep-results.json ]; then
-            echo "=== Semgrep Results ==="
-            cat semgrep-results.json | python3 -m json.tool 2>/dev/null | head -100
-          fi
-
-      - name: Semgrep strict check
-        run: semgrep scan --config auto --config p/security-audit --error .
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: semgrep-results.json
+          retention-days: 14
+          if-no-files-found: ignore
 
   gdscript-lint:
-    name: GDScript Lint
+    name: GDScript Lint (gdlint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install gdtoolkit
-        run: pip install gdtoolkit==4.*
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      - name: Run gdlint
+      - name: Install gdtoolkit
+        run: pip install gdtoolkit==4.5.0
+
+      - name: Run gdlint (blocking)
         run: |
           echo "=== GDScript Linting ==="
-          gdlint src/ || true
+          gdlint src/ tests/
 
-      - name: Run gdformat check
+      - name: Run gdformat check (non-blocking advisory)
         run: |
           echo "=== GDScript Format Check ==="
-          gdformat --check src/ 2>&1 || echo "Format differences found (non-blocking)"
+          gdformat --check src/ tests/ 2>&1 || \
+            echo "::warning::gdformat differences found - run 'gdformat src/ tests/' locally"
 
   godot-compile:
-    name: Godot Compile Check
+    name: Godot Compile & Unit Tests
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
@@ -63,7 +86,8 @@ jobs:
       - name: Setup export templates
         run: |
           mkdir -p /root/.local/share/godot/export_templates/4.3.stable
-          mv /root/.local/share/godot/templates/4.3.stable/* /root/.local/share/godot/export_templates/4.3.stable/ || true
+          mv /root/.local/share/godot/templates/4.3.stable/* \
+             /root/.local/share/godot/export_templates/4.3.stable/ || true
 
       - name: Import project
         run: godot --headless --import 2>&1 | tee import.log
@@ -73,6 +97,11 @@ jobs:
           if grep -q "Failed to load script" import.log; then
             echo "::error::Script compilation errors detected"
             grep "Failed to load script" import.log
+            exit 1
+          fi
+          if grep -qE "SCRIPT ERROR|Parse Error" import.log; then
+            echo "::error::Parse errors detected in import log"
+            grep -E "SCRIPT ERROR|Parse Error" import.log
             exit 1
           fi
           echo "All scripts compiled successfully"
@@ -85,6 +114,49 @@ jobs:
             exit 1
           fi
           echo "All tests passed"
+
+  python-lint:
+    name: Python Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install ruff
+        run: pip install ruff==0.7.4
+
+      - name: Run ruff check (blocking)
+        run: |
+          echo "=== Ruff Lint ==="
+          ruff check tools/
+
+      - name: Run ruff format check (non-blocking advisory)
+        run: |
+          echo "=== Ruff Format Check ==="
+          ruff format --check tools/ 2>&1 || \
+            echo "::warning::ruff format differences found - run 'ruff format tools/' locally"
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint==1.35.1
+
+      - name: Run yamllint
+        run: |
+          yamllint \
+            -d "{extends: relaxed, rules: {line-length: {max: 200}, trailing-spaces: enable}}" \
+            .github/ .pre-commit-config.yaml .gdlintrc .semgrep/
 
   shellcheck:
     name: ShellCheck
@@ -112,9 +184,9 @@ jobs:
           ERRORS=0
           for f in $(find assets/data -name "*.json" 2>/dev/null); do
             if python3 -m json.tool "$f" > /dev/null 2>&1; then
-              echo "✓ $f"
+              echo "OK  $f"
             else
-              echo "✗ $f - INVALID JSON"
+              echo "BAD $f - INVALID JSON"
               ERRORS=$((ERRORS + 1))
             fi
           done
@@ -134,7 +206,8 @@ jobs:
 
       - name: Install trufflehog
         run: |
-          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh \
+            | sh -s -- -b /usr/local/bin
 
       - name: Run TruffleHog
         run: trufflehog filesystem --directory . --fail --no-update
@@ -150,9 +223,9 @@ jobs:
           MISSING=0
           for f in README.md LICENSE .gitignore project.godot; do
             if [ -f "$f" ]; then
-              echo "✓ $f exists"
+              echo "OK  $f exists"
             else
-              echo "✗ $f MISSING"
+              echo "BAD $f MISSING"
               MISSING=$((MISSING + 1))
             fi
           done
@@ -163,7 +236,7 @@ jobs:
       - name: Check project.godot metadata
         run: |
           if grep -q 'config/name=' project.godot; then
-            echo "✓ Project name set"
+            echo "OK  Project name set"
           else
             echo "::error::Project name not set in project.godot"
             exit 1
