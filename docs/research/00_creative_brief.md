@@ -121,20 +121,61 @@ a primary comedy engine. Comedy is about the work and the people doing it.
 
 Existing campaign structure stands:
 
-- **DarkLock Ransomware Gang** (Acts 1–2)
-- **Phantom Bear APT** (Acts 2–3)
-- **The Insider** (Act 1, escalates)
-- **Convergence** (Act 3 finale — all three hit the same target)
+- **DarkLock Ransomware Gang** (Acts 1–2) — RaaS analog in the
+  LockBit/ALPHV lineage. Affiliate-driven, leak-site-forward, messy.
+- **Phantom Bear APT** (Acts 2–3) — Chinese MSS-adjacent analog in the
+  APT41 lineage. Dual espionage/crime motive. Primary chain is
+  **edge-device exploitation** (Fortinet / Ivanti / Cisco ASA) into
+  lateral movement and eventually into cloud (M365 / Entra). Cloud
+  artifacts show up in the back half of Phantom Bear cases, not the
+  front — edge devices are the hook.
+- **The Insider** (Act 1, escalates) — **rogue sysadmin** archetype.
+  Senior IT person at a client org, years of grievance, methodical.
+  Sells access and exfils data on a long timeline. More sympathetic
+  figure than Lapsus\$-style; quieter comedy. The Insider arc runs on
+  its own rails and **does not intersect with rev-proxy's marketplace**
+  — Convergence still bundles all three threats onto one victim but
+  the Insider's presence at that victim is independent.
+- **Convergence** (Act 3 finale) — DarkLock and Phantom Bear hit the
+  same target because rev-proxy sold them the same foothold; the
+  Insider is already inside that target for entirely unrelated
+  reasons. Triple-threat coincidence that rev-proxy partially
+  orchestrated and entirely failed to foresee.
 
 ### The orchestrator: rogue Initial Access Broker
 
-The Convergence is not coincidence. A **rogue IAB / access broker**
-mercenary, morally grey, not ideological — sold the same foothold to
-DarkLock, Phantom Bear, and the Insider's handler. They are a **shadow in
-the margins**: a handle that surfaces in forum scrapes, passive DNS, chat
-leaks, and sandbox sample telemetry. Never seen on screen until Convergence.
-Players who pay attention across many cases will start to feel the shape
-of them before the reveal.
+The Convergence is not coincidence for DarkLock and Phantom Bear. A
+**rogue IAB / access broker** mercenary, morally grey, not ideological
+— sold the same foothold to both. They are a **shadow in the margins**:
+a handle that surfaces in forum scrapes, passive DNS, WHOIS registrant
+fields, chat leaks, and sandbox sample telemetry. Never seen on screen
+until Convergence. Players who pay attention across many cases will
+start to feel the shape of them before the reveal.
+
+- **Handle:** `rev-proxy`. Lowercase, network pun, forum-veteran
+  affect. Dry, professional, signs off with "usual terms."
+- **Voice rules:** never explains themselves, never brags, never uses
+  slang, never appears in real-time — only cached forum posts, DM
+  dumps, WHOIS fields, reused infra. Their code of conduct ("no kids'
+  hospitals, no same-buyer-twice-in-30-days") is implied, never
+  stated.
+- **Phase 1 breadcrumb carriers:** reused WHOIS registrant email
+  across C2 domains in different cases. (TLS certificate SHA1 reuse
+  across C2 infra is on the roadmap for a later pass.)
+- **Clue density:** sparse. Maybe one breadcrumb per side case. Most
+  players won't notice for 4–5 cases. The reveal should hit hard for
+  the players who do.
+
+### Intel dossier (cross-case memory)
+
+The player has a persistent **Intel Dossier** on the evidence board: a
+relationship graph that accumulates entities (handles, IPs, domains,
+registrant emails, cert hashes) across *completed cases*, not just the
+active one. A new terminal command `intel search <query>` surfaces
+matches across every case the player has touched. This is the
+mechanical spine the rev-proxy slow-reveal rides on — the first time a
+player runs `intel search admin@<reused-registrant>` and sees the same
+email across two completed cases should be a small, memorable beat.
 
 ### Side cases
 
