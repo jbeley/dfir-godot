@@ -1,0 +1,87 @@
+## Semgrep rules for GDScript (Godot 4).
+##
+## Semgrep does not natively parse GDScript, so these rules use generic
+## mode (language: generic). That means patterns match against text
+## tokens, not an AST. Keep patterns conservative — prefer a false
+## negative over a noisy false positive.
+##
+## To run locally:
+##   semgrep scan --config .semgrep/gdscript.yml src/
+rules:
+  - id: gdscript-os-execute-variable
+    severity: WARNING
+    languages: [generic]
+    paths:
+      include:
+        - "*.gd"
+    message: >-
+      OS.execute / OS.create_process called with a non-literal argument.
+      If any component comes from user input, mods, network, or save
+      data, this is command injection. Audit the call site and pin the
+      executable path + args to constants.
+    pattern-either:
+      - pattern: OS.execute($VAR, ...)
+      - pattern: OS.create_process($VAR, ...)
+    pattern-not-regex: 'OS\.(execute|create_process)\("[^"]+"'
+
+  - id: gdscript-load-with-concat
+    severity: WARNING
+    languages: [generic]
+    paths:
+      include:
+        - "*.gd"
+    message: >-
+      load() or ResourceLoader.load() called on a concatenated string.
+      Godot resource paths coming from save data, mods, or network input
+      can be used to instantiate arbitrary resources (including GDScript
+      with _init() side effects). Sanitize to a known path allowlist.
+    pattern-either:
+      - pattern: load($A + $B)
+      - pattern: ResourceLoader.load($A + $B)
+      - pattern: preload($A + $B)
+
+  - id: gdscript-hardcoded-credential
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "*.gd"
+    message: >-
+      Hardcoded credential literal in GDScript. Game-fiction secrets
+      (e.g. in-case evidence) should live in JSON case packs, not in
+      .gd source, so they can be audited independently of code.
+    pattern-regex: '(?i)(api[_-]?key|secret[_-]?key|access[_-]?token|bearer[_-]?token)\s*[:=]\s*"[A-Za-z0-9_\-]{16,}"'
+
+  - id: gdscript-insecure-http-url
+    severity: INFO
+    languages: [generic]
+    paths:
+      include:
+        - "*.gd"
+    message: >-
+      Plain http:// URL in GDScript. Use https:// for any network
+      requests the shipping game makes. Fictional in-evidence URLs are
+      fine (flagged INFO only) but real fetch targets should be https.
+    pattern-regex: 'HTTPRequest.*"http://[^"]*"'
+
+  - id: gdscript-dangerous-expression-eval
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "*.gd"
+    message: >-
+      Expression.parse / Expression.execute with a non-literal input
+      allows arbitrary GDScript expression evaluation. If the input
+      comes from mods, save data, or a case pack, this is code
+      execution by another name.
+    pattern-either:
+      - pattern: |
+          $E = Expression.new()
+          ...
+          $E.parse($USER_INPUT)
+      - pattern: |
+          var $E: Expression = Expression.new()
+          ...
+          $E.parse($USER_INPUT)
+    pattern-not-regex: '\.parse\("[^"]+"'

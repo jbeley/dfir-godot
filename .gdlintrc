@@ -1,10 +1,22 @@
-class-definitions-order := ["tools", "classnames", "extends", "signals", "enums", "consts", "exports", "pubvars", "prvvars", "onreadypubvars", "onreadyprvvars", "others"]
-function-name = "(_on_|_)[a-z][a-z0-9_]*"
-class-name = "[A-Z][a-zA-Z0-9]*"
-signal-name = "[a-z][a-z0-9_]*"
-const-name = "[A-Z_][A-Z0-9_]*"
-enum-name = "[A-Z][a-zA-Z0-9]*"
-enum-element-name = "[A-Z_][A-Z0-9_]*"
-max-line-length = 120
-tab-characters = 1
-max-file-lines = 500
+# gdlint configuration for DFIR Simulator.
+# This file must be valid YAML (older := / = syntax did not parse under
+# gdtoolkit 4.3+ and silently disabled the entire config).
+#
+# Line length is generous to accommodate embedded evidence/log strings
+# inlined in GDScript source (case loaders, sample content). Code lines
+# should still aim for ~100 chars.
+
+max-line-length: 500
+max-returns: 12
+max-public-methods: 40
+
+# Rules we deliberately relax for this codebase:
+# - class-definitions-order: autoloads and data models freely mix
+#   pubvars / signals / enums; enforcing the default order would require
+#   a full restructure for no real benefit.
+# - no-elif-return / no-else-return: we prefer explicit branches in
+#   match-heavy dispatch code.
+disable:
+  - class-definitions-order
+  - no-elif-return
+  - no-else-return

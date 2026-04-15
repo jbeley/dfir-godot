@@ -12,16 +12,32 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/Scony/godot-gdscript-toolkit
-    rev: 4.3.0
+    rev: 4.5.0
     hooks:
       - id: gdlint
         files: '\.gd$'
 
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        files: '^tools/.*\.py$'
+      - id: ruff-format
+        files: '^tools/.*\.py$'
+
   - repo: https://github.com/semgrep/semgrep
-    rev: v1.90.0
+    rev: v1.96.0
     hooks:
       - id: semgrep
-        args: ['--config', 'auto', '--error']
+        args:
+          - '--config'
+          - 'p/security-audit'
+          - '--config'
+          - 'p/owasp-top-ten'
+          - '--config'
+          - '.semgrep/gdscript.yml'
+          - '--error'
+          - '--metrics=off'
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1

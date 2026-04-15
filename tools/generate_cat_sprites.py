@@ -248,7 +248,7 @@ def main():
     print(f"Cat spritesheet saved: {path}")
     print(f"  Size: {sheet.size[0]}x{sheet.size[1]} ({COLS} cols x {ROWS} rows)")
     print(f"  Frame size: {W}x{H}")
-    print(f"  States: idle(2), walk_r(4), walk_l(4), sleep(2), keyboard(2), petted(3)")
+    print("  States: idle(2), walk_r(4), walk_l(4), sleep(2), keyboard(2), petted(3)")
 
 
 if __name__ == '__main__':

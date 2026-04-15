@@ -27,7 +27,14 @@ REQUEST_DELAY = 2.0  # seconds between requests
 
 
 def fetch_json(url: str, description: str) -> dict | list | None:
-    """Fetch JSON from URL with rate limiting and error handling."""
+    """Fetch JSON from URL with rate limiting and error handling.
+
+    Only https:// URLs are permitted: urllib.urlopen also honors file://
+    and other schemes, so we gate explicitly to prevent any accidental or
+    malicious reuse of this helper for local-file reads.
+    """
+    if not url.startswith("https://"):
+        raise ValueError(f"fetch_json: refusing non-https URL: {url!r}")
     print(f"  Fetching {description}...")
     print(f"  URL: {url}")
     try:
@@ -35,6 +42,7 @@ def fetch_json(url: str, description: str) -> dict | list | None:
             'User-Agent': 'DFIR-Simulator/1.0 (educational game; github.com/jbeley/dfir-godot)',
             'Accept': 'application/json',
         })
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode())
             print(f"  OK ({len(json.dumps(data))} bytes)")
