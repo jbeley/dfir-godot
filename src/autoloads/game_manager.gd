@@ -55,6 +55,9 @@ func save_game(slot: int = 0) -> void:
 			"completed_arcs": CampaignManager.completed_arcs,
 			"total_cases": CampaignManager.total_cases_completed,
 		},
+		"world": WorldManager.to_save_dict(),
+		"journal": JournalManager.to_save_dict(),
+		"heat": HeatManager.to_save_dict(),
 	}
 
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
@@ -101,6 +104,10 @@ func load_game(slot: int = 0) -> bool:
 	var arcs: Variant = campaign.get("completed_arcs", {})
 	if arcs is Dictionary:
 		CampaignManager.completed_arcs = arcs as Dictionary
+
+	WorldManager.from_save_dict(data.get("world", {}) as Dictionary)
+	JournalManager.from_save_dict(data.get("journal", {}) as Dictionary)
+	HeatManager.from_save_dict(data.get("heat", {}) as Dictionary)
 
 	return true
 

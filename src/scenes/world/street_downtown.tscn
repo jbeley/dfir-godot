@@ -1,0 +1,112 @@
+[gd_scene load_steps=8 format=3 uid="uid://street_downtown"]
+
+[ext_resource type="Script" path="res://src/scenes/world/street_downtown.gd" id="1_street"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
+[ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="5_secret"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="6_spawn"]
+
+[sub_resource type="RectangleShape2D" id="shape_secret"]
+size = Vector2(20, 20)
+
+[node name="StreetDowntown" type="Node2D"]
+script = ExtResource("1_street")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 110.0
+color = Color(0.45, 0.5, 0.65, 1)
+
+[node name="Sidewalk" type="ColorRect" parent="."]
+offset_top = 110.0
+offset_right = 960.0
+offset_bottom = 270.0
+color = Color(0.32, 0.32, 0.35, 1)
+
+[node name="Road" type="ColorRect" parent="."]
+offset_top = 180.0
+offset_right = 960.0
+offset_bottom = 220.0
+color = Color(0.18, 0.18, 0.2, 1)
+
+[node name="ApartmentBldg" type="ColorRect" parent="."]
+offset_left = 60.0
+offset_top = 30.0
+offset_right = 200.0
+offset_bottom = 180.0
+color = Color(0.55, 0.42, 0.32, 1)
+
+[node name="SiteBldg" type="ColorRect" parent="."]
+offset_left = 720.0
+offset_top = 30.0
+offset_right = 880.0
+offset_bottom = 180.0
+color = Color(0.42, 0.46, 0.5, 1)
+
+[node name="ApartmentLabel" type="Label" parent="."]
+offset_left = 90.0
+offset_top = 80.0
+offset_right = 180.0
+offset_bottom = 96.0
+text = "APARTMENT"
+horizontal_alignment = 1
+
+[node name="SiteLabel" type="Label" parent="."]
+offset_left = 740.0
+offset_top = 80.0
+offset_right = 860.0
+offset_bottom = 96.0
+text = "SITE"
+horizontal_alignment = 1
+
+[node name="ApartmentDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(130, 178)
+target_location = &"apartment"
+target_spawn = &"from_street"
+prompt = "[E] Go inside (home)"
+
+[node name="SiteDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(800, 178)
+target_location = &"site_shell"
+target_spawn = &"default"
+prompt = "[E] Enter the site"
+
+[node name="FlavorNPC" parent="." instance=ExtResource("4_npc")]
+position = Vector2(440, 200)
+npc_id = &"street_busker"
+display_name = "Busker"
+archetype = 1
+first_line = "You ever notice the streetlights blink in pairs around 3am? Just saying."
+
+[node name="HiddenSecret" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(620, 200)
+script = ExtResource("5_secret")
+secret_id = &"streetlight_pattern"
+display_name = "Sticker on a lamppost"
+lore_text = "A faded sticker. Tiny lettering: \"phrack #49 - smashing the stack.\" Someone keeps the old ways alive."
+prompt = "[E] Look closer"
+
+[node name="HiddenSecretShape" type="CollisionShape2D" parent="HiddenSecret"]
+shape = SubResource("shape_secret")
+
+[node name="ApartmentSpawn" type="Marker2D" parent="."]
+position = Vector2(150, 200)
+script = ExtResource("6_spawn")
+id = &"default"
+
+[node name="FromSiteSpawn" type="Marker2D" parent="."]
+position = Vector2(770, 200)
+script = ExtResource("6_spawn")
+id = &"from_site"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(150, 200)
+
+[node name="Camera" type="Camera2D" parent="Player"]
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+limit_left = 0
+limit_top = 0
+limit_right = 960
+limit_bottom = 270

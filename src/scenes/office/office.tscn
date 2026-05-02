@@ -158,6 +158,27 @@ position = Vector2(200, 230)
 [node name="Shape" type="CollisionShape2D" parent="Hotspots/Phone"]
 shape = SubResource("shape_phone")
 
+[node name="FrontDoor" type="Area2D" parent="Hotspots" groups=["hotspots"]]
+position = Vector2(456, 240)
+
+[node name="Shape" type="CollisionShape2D" parent="Hotspots/FrontDoor"]
+shape = SubResource("shape_phone")
+
+[node name="FromStreetSpawn" type="Marker2D" parent="."]
+position = Vector2(440, 220)
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(240, 160)
+
+[node name="DoorSign" type="Label" parent="."]
+offset_left = 432.0
+offset_top = 220.0
+offset_right = 480.0
+offset_bottom = 232.0
+text = "front
+door"
+horizontal_alignment = 1
+
 [node name="Walls" type="StaticBody2D" parent="."]
 
 [node name="TopWall" type="CollisionShape2D" parent="Walls"]
