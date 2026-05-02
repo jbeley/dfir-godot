@@ -22,6 +22,7 @@ func _init() -> void:
 	test_faction_standing_accumulates()
 	test_save_roundtrip_preserves_state()
 	test_register_secret_increments_known()
+	test_register_secret_dedupes_on_revisit()
 	print("\n=== Results: %d passed, %d failed ===" % [_pass_count, _fail_count])
 	if _fail_count > 0:
 		print("FAILED")
@@ -115,6 +116,15 @@ func test_register_secret_increments_known() -> void:
 	jm.register_secret(&"a")
 	jm.register_secret(&"b")
 	assert_eq(jm.get_secrets_known_count(), 2)
+
+
+func test_register_secret_dedupes_on_revisit() -> void:
+	_test_name = "register_secret_dedupes_on_revisit"
+	var jm: Object = _make()
+	jm.register_secret(&"a")
+	jm.register_secret(&"a")
+	jm.register_secret(&"a")
+	assert_eq(jm.get_secrets_known_count(), 1)
 
 
 func assert_eq(got: Variant, expected: Variant) -> void:

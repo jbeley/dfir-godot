@@ -7,3 +7,10 @@ extends "res://src/scenes/components/world_scene.gd"
 func _ready() -> void:
 	location_id = &"site_acme_cubes"
 	super._ready()
+	var phil: WorldNPC = get_node_or_null("Phil") as WorldNPC
+	if phil != null:
+		phil.lines = PackedStringArray([
+			"I told them. I told them. We needed MFA. Said it was too inconvenient.",
+			"The ransom note is on every desktop. Every. Desktop. Backups too.",
+			"I run the IT here. Solo. One guy. They want security, hire two more of me.",
+		])

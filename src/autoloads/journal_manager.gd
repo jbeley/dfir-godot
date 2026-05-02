@@ -14,10 +14,10 @@ var _secrets_found: Dictionary = {}  # StringName -> Dictionary{display_name, lo
 var _rumors_heard: Dictionary = {}  # StringName -> String (rumor text)
 var _faction_standing: Dictionary = {}  # StringName -> int
 
-# Total counts of *known-but-not-required* discoverables, populated by content.
-# A scene registers its secrets at _ready so the journal can show "X of Y found"
-# without revealing identity.
-var _registered_secret_count: int = 0
+# Set of registered secret ids. Internal — never exposed, only its size is.
+# Using a set so a SecretMarker that re-runs _ready (scene revisit) doesn't
+# inflate the denominator for the journal's "X of Y found" counter.
+var _registered_secret_ids: Dictionary = {}
 
 
 func record_location_visited(location_id: StringName) -> void:
@@ -66,11 +66,14 @@ func record_faction_interaction(faction_id: StringName, delta: int) -> void:
 	faction_interaction.emit(faction_id, delta)
 
 
-func register_secret(_secret_id: StringName) -> void:
+func register_secret(secret_id: StringName) -> void:
 	## Scenes call this for each placed secret marker so the counter denominator
-	## reflects what's actually findable in the player's world. We don't track
-	## ids here because the journal must not leak unfound secrets.
-	_registered_secret_count += 1
+	## reflects what's actually findable. Idempotent — re-registering the same
+	## id on scene revisit is a no-op, and the journal never exposes the ids
+	## of unfound secrets.
+	if secret_id == &"":
+		return
+	_registered_secret_ids[secret_id] = true
 
 
 func get_secrets_found_count() -> int:
@@ -78,7 +81,7 @@ func get_secrets_found_count() -> int:
 
 
 func get_secrets_known_count() -> int:
-	return _registered_secret_count
+	return _registered_secret_ids.size()
 
 
 func get_locations_visited() -> Dictionary:
@@ -119,7 +122,7 @@ func reset() -> void:
 	_secrets_found.clear()
 	_rumors_heard.clear()
 	_faction_standing.clear()
-	_registered_secret_count = 0
+	_registered_secret_ids.clear()
 
 
 func to_save_dict() -> Dictionary:

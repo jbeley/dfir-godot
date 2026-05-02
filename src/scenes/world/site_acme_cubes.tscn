@@ -79,8 +79,7 @@ position = Vector2(260, 95)
 npc_id = &"phil_garcia"
 display_name = "Phil from IT"
 archetype = 1
-first_line = "I told them. I told them. We needed MFA. They said it was 'too inconvenient for the field reps.' Inconvenient! I —"
-lines = PackedStringArray(["I told them. I told them. We needed MFA. They said it was 'too inconvenient for the field reps.' Inconvenient! I —", "The ransom note? It's on EVERY desktop. Every. Desktop. They got the file server, the backups, the —", "Look, I run the IT here. Solo. One guy. They want a security program, fine, hire two more of me."])
+first_line = "I told them we needed MFA."
 
 [node name="LobbyDoor" parent="." instance=ExtResource("3_door")]
 position = Vector2(40, 220)

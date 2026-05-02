@@ -48,5 +48,7 @@ func interact() -> void:
 			journal.record_npc_met(npc_id, display_name, Archetype.keys()[archetype], line)
 		if faction_id != &"" and _line_index == 0:
 			journal.record_faction_interaction(faction_id, 1)
-	_line_index += 1
+	# Emit *before* advancing so the handler shows the line we just observed,
+	# not the next one in the cycle.
 	dialogue_requested.emit(self)
+	_line_index += 1

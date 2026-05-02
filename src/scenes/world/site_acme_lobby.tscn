@@ -93,8 +93,7 @@ position = Vector2(240, 130)
 npc_id = &"marcie_rivera"
 display_name = "Marcie Rivera"
 archetype = 0
-first_line = "You're the consultant? Thank god. I'm Marcie — office manager. Twenty-three years here. Whatever you need, ask me first."
-lines = PackedStringArray(["You're the consultant? Thank god. I'm Marcie — office manager. Twenty-three years here. Whatever you need, ask me first.", "Phil — IT — has been quiet lately. Not 'productive quiet.' 'I-don't-want-to-tell-you-something' quiet. Worth a chat.", "We had a 'cybersecurity awareness' presentation last spring. Free pizza, half the office didn't show. Pizza was bad too."])
+first_line = "You're the consultant? Thank god. I'm Marcie."
 
 [node name="Plaque" type="Area2D" parent="." groups=["hotspots"]]
 position = Vector2(370, 60)

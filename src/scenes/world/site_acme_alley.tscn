@@ -74,8 +74,7 @@ npc_id = &"alley_janitor"
 display_name = "The janitor"
 archetype = 2
 prompt_override = "[E] Talk to the janitor"
-first_line = "Thirty-one years on this dock. I take out the trash, I see things. I see them every day."
-lines = PackedStringArray(["Thirty-one years on this dock. I take out the trash, I see things. I see them every day.", "That van has been parked there since Monday. Same plate. Different driver every other day. They don't unload anything.", "I'm not paid to ask. But — if I were a young man, I would ask."])
+first_line = "Thirty-one years on this dock. I see things."
 
 [node name="Mike" parent="." instance=ExtResource("4_npc")]
 position = Vector2(380, 230)
@@ -84,8 +83,7 @@ display_name = "Mike"
 archetype = 3
 faction_id = &"darklock"
 prompt_override = "[E] See what Mike wants"
-first_line = "Hey. You're the consultant, right? Look — I do contract work. Some of it is for, let's say, parties on the other side of incidents like this. There's good money in being slow."
-lines = PackedStringArray(["Hey. You're the consultant, right? Look — I do contract work. Some of it is for, let's say, parties on the other side of incidents like this. There's good money in being slow.", "Don't decide now. Just — if your timeline grading happens to come in a little late, certain people would like that. Anonymous, etcetera.", "Suit yourself. You know where to find me. Or you don't. Either way."])
+first_line = "Hey. You're the consultant, right?"
 
 [node name="WhiteVan" type="Area2D" parent="." groups=["hotspots"]]
 position = Vector2(240, 130)
