@@ -1,0 +1,126 @@
+[gd_scene load_steps=2 format=3 uid="uid://journal_overlay"]
+
+[ext_resource type="Script" path="res://src/scenes/journal/journal.gd" id="1_journal"]
+
+[node name="Journal" type="CanvasLayer"]
+layer = 60
+script = ExtResource("1_journal")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = 120.0
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="V" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Panel/Margin/V"]
+layout_mode = 2
+text = "Journal"
+horizontal_alignment = 1
+
+[node name="Tabs" type="TabContainer" parent="Panel/Margin/V"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 180)
+
+[node name="Locations" type="VBoxContainer" parent="Panel/Margin/V/Tabs"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/V/Tabs/Locations"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Locations" type="ItemList" parent="Panel/Margin/V/Tabs/Locations/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="NPCs" type="VBoxContainer" parent="Panel/Margin/V/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/V/Tabs/NPCs"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NPCs" type="ItemList" parent="Panel/Margin/V/Tabs/NPCs/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Secrets" type="VBoxContainer" parent="Panel/Margin/V/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="Panel/Margin/V/Tabs/Secrets"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Counter" type="Label" parent="Panel/Margin/V/Tabs/Secrets/V"]
+layout_mode = 2
+text = "Secrets found: 0 / 0"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/V/Tabs/Secrets/V"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Secrets" type="ItemList" parent="Panel/Margin/V/Tabs/Secrets/V/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Rumors" type="VBoxContainer" parent="Panel/Margin/V/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/V/Tabs/Rumors"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Rumors" type="ItemList" parent="Panel/Margin/V/Tabs/Rumors/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Factions" type="VBoxContainer" parent="Panel/Margin/V/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Margin/V/Tabs/Factions"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Factions" type="ItemList" parent="Panel/Margin/V/Tabs/Factions/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Footer" type="HBoxContainer" parent="Panel/Margin/V"]
+layout_mode = 2
+alignment = 1
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/V/Footer"]
+layout_mode = 2
+text = "Close [J / Esc]"

@@ -30,6 +30,8 @@ func _ready() -> void:
 	_update_day_night(TimeManager.current_hour)
 	_setup_hotspots()
 	_apply_apartment_visuals()
+	_position_player_for_arrival()
+	JournalManager.record_location_visited(&"apartment")
 
 	# Tutorial hint
 	TutorialManager.trigger("office_ready")
@@ -61,6 +63,16 @@ func _process(delta: float) -> void:
 	if _highlight_node and is_instance_valid(_highlight_node):
 		var pulse: float = 0.4 + 0.5 * (sin(Time.get_ticks_msec() / 200.0) * 0.5 + 0.5)
 		_highlight_node.modulate = Color(1, 1, 0.5, pulse)
+
+
+func _position_player_for_arrival() -> void:
+	var spawn_id: StringName = WorldManager.consume_spawn_id()
+	var marker_name := "DefaultSpawn"
+	if spawn_id == &"from_street":
+		marker_name = "FromStreetSpawn"
+	var marker: Node2D = get_node_or_null(marker_name) as Node2D
+	if marker != null:
+		player.global_position = marker.global_position
 
 
 func _setup_hotspots() -> void:
@@ -135,6 +147,7 @@ func _get_hotspot_prompt(hotspot_name: String) -> String:
 		"Bed": return "[E] Sleep"
 		"Coffee": return "[E] Make coffee"
 		"Cat": return "[E] Pet the cat"
+		"FrontDoor": return "[E] Step outside"
 	return "[E] Interact"
 
 
@@ -169,6 +182,8 @@ func _on_player_interact(target: Node2D) -> void:
 				GameManager.change_scene("res://src/scenes/dialogue/dialogue_scene.tscn")
 			else:
 				GameManager.change_scene("res://src/scenes/email/email_client.tscn")
+		"FrontDoor":
+			WorldManager.travel_to(&"street_downtown", &"default")
 
 
 func _on_interruption(interruption: Dictionary) -> void:
