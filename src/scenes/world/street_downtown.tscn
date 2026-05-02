@@ -42,7 +42,7 @@ offset_left = 720.0
 offset_top = 30.0
 offset_right = 880.0
 offset_bottom = 180.0
-color = Color(0.42, 0.46, 0.5, 1)
+color = Color(0.55, 0.5, 0.4, 1)
 
 [node name="ApartmentLabel" type="Label" parent="."]
 offset_left = 90.0
@@ -57,7 +57,7 @@ offset_left = 740.0
 offset_top = 80.0
 offset_right = 860.0
 offset_bottom = 96.0
-text = "SITE"
+text = "ACME WIDGET"
 horizontal_alignment = 1
 
 [node name="ApartmentDoor" parent="." instance=ExtResource("3_door")]
@@ -68,9 +68,9 @@ prompt = "[E] Go inside (home)"
 
 [node name="SiteDoor" parent="." instance=ExtResource("3_door")]
 position = Vector2(800, 178)
-target_location = &"site_shell"
+target_location = &"site_acme_lobby"
 target_spawn = &"default"
-prompt = "[E] Enter the site"
+prompt = "[E] Enter Acme Widget Corp"
 
 [node name="FlavorNPC" parent="." instance=ExtResource("4_npc")]
 position = Vector2(440, 200)
