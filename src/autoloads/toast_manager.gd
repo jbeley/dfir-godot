@@ -154,6 +154,61 @@ func _on_journal_location_visited(location_id: StringName) -> void:
 			loc_name = loc.display_name
 	show_toast("Discovered: %s" % loc_name, "discovery")
 	_play("location_arrived")
+	_maybe_first_journal_hint(location_id)
+
+
+func _maybe_first_journal_hint(location_id: StringName) -> void:
+	# When the player first leaves the apartment for *anywhere* else, surface
+	# the J keybind so they know the journal exists.
+	if location_id == &"apartment":
+		return
+	if _journal_hint_shown():
+		return
+	_remember_journal_hint_shown()
+	# Slight delay so it lands after the "Discovered" toast.
+	await get_tree().create_timer(1.4, true).timeout
+	show_toast("Tip: press [J] to open your journal anywhere", "info")
+
+
+func _journal_hint_shown() -> bool:
+	return _persistent_flag("journal_hint_shown")
+
+
+func _remember_journal_hint_shown() -> void:
+	_set_persistent_flag("journal_hint_shown", true)
+
+
+const _FLAG_PATH: String = "user://saves/ui_flags.json"
+
+
+func _persistent_flag(key: String) -> bool:
+	if not FileAccess.file_exists(_FLAG_PATH):
+		return false
+	var f: FileAccess = FileAccess.open(_FLAG_PATH, FileAccess.READ)
+	if f == null:
+		return false
+	var data: Variant = JSON.parse_string(f.get_as_text())
+	f.close()
+	if data is Dictionary:
+		return bool(data.get(key, false))
+	return false
+
+
+func _set_persistent_flag(key: String, value: bool) -> void:
+	DirAccess.make_dir_recursive_absolute("user://saves")
+	var data: Dictionary = {}
+	if FileAccess.file_exists(_FLAG_PATH):
+		var fr: FileAccess = FileAccess.open(_FLAG_PATH, FileAccess.READ)
+		if fr:
+			var parsed: Variant = JSON.parse_string(fr.get_as_text())
+			fr.close()
+			if parsed is Dictionary:
+				data = parsed
+	data[key] = value
+	var fw: FileAccess = FileAccess.open(_FLAG_PATH, FileAccess.WRITE)
+	if fw:
+		fw.store_string(JSON.stringify(data))
+		fw.close()
 
 
 func _on_journal_secret_found(_secret_id: StringName) -> void:

@@ -202,6 +202,12 @@ func _run() -> void:
 		HeatManager.get_heat(&"darklock") > heat_after_acme
 	)
 
+	# Save/load round-trip: persist state, wipe in-memory state, reload, and
+	# verify the journal/heat/world state is identical. Catches regressions
+	# in the GameManager save format and the *_save_dict / from_save_dict
+	# implementations.
+	await _save_load_roundtrip()
+
 	# Open the journal as the final visual; flip through the tabs.
 	await _press_journal()
 	await _capture("journal_locations")
@@ -225,6 +231,60 @@ func _run() -> void:
 		for f: String in _failures:
 			print("  FAIL: " + f)
 	get_tree().quit()
+
+
+func _save_load_roundtrip() -> void:
+	# Snapshot expected values from in-memory state.
+	var expected_locations: Dictionary = JournalManager.get_locations_visited().duplicate(true)
+	var expected_npcs: Dictionary = JournalManager.get_npcs_met().duplicate(true)
+	var expected_secrets: Dictionary = JournalManager.get_secrets_found().duplicate(true)
+	var expected_rumors: Dictionary = JournalManager.get_rumors_heard().duplicate(true)
+	var expected_factions: Dictionary = JournalManager.get_all_faction_standings().duplicate(true)
+	var expected_heat: Dictionary = HeatManager.get_all_heat().duplicate(true)
+	var expected_discovered: Array[StringName] = WorldManager.discovered_locations.duplicate()
+
+	# Persist + wipe + restore.
+	GameManager.save_game(99)
+	JournalManager.reset()
+	HeatManager.reset()
+	WorldManager.reset()
+	_check("post-reset journal is empty", JournalManager.get_npcs_met().is_empty())
+	_check("post-reset heat is empty", HeatManager.get_all_heat().is_empty())
+	_check("post-reset world has no discoveries", WorldManager.discovered_locations.is_empty())
+
+	var ok: bool = GameManager.load_game(99)
+	_check("load_game returned true", ok)
+
+	_check("locations restored", _dicts_equal(
+		JournalManager.get_locations_visited(), expected_locations, "locations"))
+	_check("npcs restored", _dicts_equal(
+		JournalManager.get_npcs_met(), expected_npcs, "npcs"))
+	_check("secrets restored", _dicts_equal(
+		JournalManager.get_secrets_found(), expected_secrets, "secrets"))
+	_check("rumors restored", _dicts_equal(
+		JournalManager.get_rumors_heard(), expected_rumors, "rumors"))
+	_check("factions restored", _dicts_equal(
+		JournalManager.get_all_faction_standings(), expected_factions, "factions"))
+	_check("heat restored", _dicts_equal(
+		HeatManager.get_all_heat(), expected_heat, "heat"))
+	_check("discovered locations count matches",
+		WorldManager.discovered_locations.size() == expected_discovered.size())
+
+
+func _dicts_equal(got: Dictionary, want: Dictionary, label: String) -> bool:
+	if got.size() != want.size():
+		print("  diff[%s]: size mismatch got=%d want=%d" % [label, got.size(), want.size()])
+		return false
+	for k: Variant in want:
+		if not got.has(k):
+			print("  diff[%s]: missing key %s" % [label, k])
+			return false
+		# `==` on Dictionary is structural and order-independent in GDScript;
+		# don't compare via str() because that prints insertion order.
+		if got[k] != want[k]:
+			print("  diff[%s]: %s got=%s want=%s" % [label, k, got[k], want[k]])
+			return false
+	return true
 
 
 func _interact_step(target: Vector2, expected_node_name: String, label: String) -> void:

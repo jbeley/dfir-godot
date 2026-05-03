@@ -135,12 +135,19 @@ func reset() -> void:
 
 
 func to_save_dict() -> Dictionary:
+	# Persist the registered_secret_ids set as a list so the "X / Y" counter
+	# survives load even before scenes have re-_ready'd. Just the ids — no
+	# lore text — so unfound secrets stay anonymous to anyone reading saves.
+	var registered: Array[String] = []
+	for sid: StringName in _registered_secret_ids:
+		registered.append(String(sid))
 	return {
 		"locations_visited": _stringify_keys(_locations_visited),
 		"npcs_met": _stringify_keys(_npcs_met),
 		"secrets_found": _stringify_keys(_secrets_found),
 		"rumors_heard": _stringify_keys(_rumors_heard),
 		"faction_standing": _stringify_keys(_faction_standing),
+		"registered_secret_ids": registered,
 	}
 
 
@@ -151,6 +158,10 @@ func from_save_dict(data: Dictionary) -> void:
 	_secrets_found = _restore_dict_of_dicts(data.get("secrets_found", {}))
 	_rumors_heard = _restore_string_dict(data.get("rumors_heard", {}))
 	_faction_standing = _restore_int_dict(data.get("faction_standing", {}))
+	var registered: Variant = data.get("registered_secret_ids", [])
+	if registered is Array:
+		for v: Variant in registered:
+			_registered_secret_ids[StringName(str(v))] = true
 
 
 func _stringify_keys(d: Dictionary) -> Dictionary:
