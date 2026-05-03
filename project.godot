@@ -34,6 +34,7 @@ WorldManager="*res://src/autoloads/world_manager.gd"
 JournalManager="*res://src/autoloads/journal_manager.gd"
 HeatManager="*res://src/autoloads/heat_manager.gd"
 JournalOverlayController="*res://src/autoloads/journal_overlay_controller.gd"
+ToastManager="*res://src/autoloads/toast_manager.gd"
 PlaythroughDriver="*res://src/autoloads/playthrough_driver.gd"
 TouchControls="*res://src/ui/components/touch_controls.tscn"
 

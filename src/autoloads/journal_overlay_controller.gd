@@ -23,6 +23,8 @@ func open() -> void:
 	_open_overlay = JOURNAL_SCENE.instantiate()
 	get_tree().root.add_child(_open_overlay)
 	_open_overlay.tree_exited.connect(_on_overlay_closed)
+	if SfxBank:
+		SfxBank.play("journal_open")
 
 
 func is_open() -> bool:
