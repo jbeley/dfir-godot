@@ -126,21 +126,47 @@ func _wire_interactions() -> void:
 func _on_interact_area_entered(area: Area2D) -> void:
 	if not area.is_in_group("hotspots"):
 		return
-	var prompt_text: String = _hotspot_prompt(area)
-	if prompt_text == "":
+	_pick_active_hotspot()
+
+
+func _on_interact_area_exited(_area: Area2D) -> void:
+	_pick_active_hotspot()
+
+
+func _pick_active_hotspot() -> void:
+	# Look at every hotspot the player's InteractArea currently overlaps and
+	# pick the closest one. Fixes the bug where a wandering cat or another
+	# moving NPC could "steal" focus from a door just by walking past.
+	var interact_area: Area2D = player.get_node_or_null("InteractArea") as Area2D
+	if interact_area == null:
+		_clear_hotspot()
 		return
-	_current_hotspot = area
-	player.set_nearby_interactable(area)
-	_prompt_label.text = prompt_text
+	var best: Area2D = null
+	var best_dist: float = INF
+	for candidate in interact_area.get_overlapping_areas():
+		if not candidate.is_in_group("hotspots"):
+			continue
+		var prompt_text: String = _hotspot_prompt(candidate)
+		if prompt_text == "":
+			continue
+		var d: float = (candidate.global_position - player.global_position).length()
+		if d < best_dist:
+			best = candidate
+			best_dist = d
+	if best == null:
+		_clear_hotspot()
+		return
+	_current_hotspot = best
+	player.set_nearby_interactable(best)
+	_prompt_label.text = _hotspot_prompt(best)
 	_prompt_label.visible = true
 	_prompt_bg.visible = true
 
 
-func _on_interact_area_exited(area: Area2D) -> void:
-	if area != _current_hotspot:
-		return
+func _clear_hotspot() -> void:
+	if _current_hotspot != null:
+		player.clear_nearby_interactable(_current_hotspot)
 	_current_hotspot = null
-	player.clear_nearby_interactable(area)
 	_prompt_label.visible = false
 	_prompt_bg.visible = false
 

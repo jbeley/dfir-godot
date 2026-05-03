@@ -88,6 +88,45 @@ def door_sprite(panel: tuple, frame: tuple, knob: tuple) -> Image.Image:
     return img
 
 
+def building_facade(
+	w: int, h: int, wall: tuple, accent: tuple, sign: tuple,
+	window_rows: int, windows_per_row: int,
+) -> Image.Image:
+	"""Render a generic building facade with a row of windows so it doesn't
+	read as a flat colored rectangle. Used as a backdrop on the street.
+	`sign` is the strip color near the top (the building name will be drawn
+	over it by a Label node, not in the texture)."""
+	img = Image.new("RGBA", (w, h), TRANSPARENT)
+	d = ImageDraw.Draw(img)
+	# Wall body.
+	d.rectangle([0, 0, w - 1, h - 1], fill=wall)
+	# Top sign band.
+	d.rectangle([0, 8, w - 1, 26], fill=sign)
+	# Trim line under the sign.
+	d.rectangle([0, 26, w - 1, 28], fill=accent)
+	# Foundation strip at the bottom.
+	d.rectangle([0, h - 4, w - 1, h - 1], fill=accent)
+	# Windows.
+	margin_x = 8
+	margin_top = 38
+	margin_bottom = 14
+	cell_w = max(1, (w - margin_x * 2) // max(1, windows_per_row))
+	cell_h = max(1, (h - margin_top - margin_bottom) // max(1, window_rows))
+	win_w = max(4, int(cell_w * 0.5))
+	win_h = max(4, int(cell_h * 0.55))
+	for r in range(window_rows):
+		for c in range(windows_per_row):
+			cx = margin_x + cell_w * c + (cell_w - win_w) // 2
+			cy = margin_top + cell_h * r + (cell_h - win_h) // 2
+			d.rectangle([cx, cy, cx + win_w - 1, cy + win_h - 1], fill=accent)
+			# Glass highlight.
+			d.rectangle(
+				[cx + 1, cy + 1, cx + win_w - 3, cy + 1 + max(1, win_h // 4)],
+				fill=(min(255, accent[0] + 40), min(255, accent[1] + 50), min(255, accent[2] + 60)),
+			)
+	return img
+
+
 def secret_marker_sprite() -> Image.Image:
     """Subtle dotted question mark — only the *outline* is rendered, kept
     very faint so it doesn't spoil the secret. Use sparingly; most secrets
@@ -132,6 +171,21 @@ def main() -> None:
     path = os.path.join(OUT, "secret_marker.png")
     img.save(path)
     print(f"  {path}")
+
+    print("== Building facades ==")
+    bldg_dir = os.path.join(OUT, "buildings")
+    ensure_dir(bldg_dir)
+    facades = {
+        # name: (w, h, wall, accent, sign, rows, cols)
+        "apartment": (140, 150, (138, 96, 70), (75, 55, 40), (180, 130, 90), 3, 3),
+        "acme_office": (160, 150, (148, 134, 100), (90, 80, 55), (170, 150, 95), 3, 4),
+        "hospital": (240, 150, (170, 188, 196), (90, 105, 115), (210, 220, 224), 3, 6),
+    }
+    for name, (w, h, wall, accent, sign, rows, cols) in facades.items():
+        img = building_facade(w, h, wall, accent, sign, rows, cols)
+        p = os.path.join(bldg_dir, f"{name}.png")
+        img.save(p)
+        print(f"  {p}")
 
 
 if __name__ == "__main__":
