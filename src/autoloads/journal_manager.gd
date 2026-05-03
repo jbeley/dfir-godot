@@ -14,10 +14,10 @@ var _secrets_found: Dictionary = {}  # StringName -> Dictionary{display_name, lo
 var _rumors_heard: Dictionary = {}  # StringName -> String (rumor text)
 var _faction_standing: Dictionary = {}  # StringName -> int
 
-# Total counts of *known-but-not-required* discoverables, populated by content.
-# A scene registers its secrets at _ready so the journal can show "X of Y found"
-# without revealing identity.
-var _registered_secret_count: int = 0
+# Set of registered secret ids. Internal — never exposed, only its size is.
+# Using a set so a SecretMarker that re-runs _ready (scene revisit) doesn't
+# inflate the denominator for the journal's "X of Y found" counter.
+var _registered_secret_ids: Dictionary = {}
 
 
 func record_location_visited(location_id: StringName) -> void:
@@ -33,12 +33,21 @@ func record_npc_met(
 ) -> void:
 	if npc_id == &"":
 		return
-	_npcs_met[npc_id] = {
-		"display_name": display_name,
-		"archetype": archetype,
-		"last_line": last_line,
-	}
-	npc_met.emit(npc_id)
+	# `npc_met` should fire only on the first encounter — subsequent calls
+	# just refresh display_name / last_line. archetype is locked on first meet
+	# so a downgrade (RECURRING -> FLAVOR) can't happen by accident.
+	var was_new: bool = not _npcs_met.has(npc_id)
+	if was_new:
+		_npcs_met[npc_id] = {
+			"display_name": display_name,
+			"archetype": archetype,
+			"last_line": last_line,
+		}
+		npc_met.emit(npc_id)
+	else:
+		var entry: Dictionary = _npcs_met[npc_id]
+		entry["display_name"] = display_name
+		entry["last_line"] = last_line
 
 
 func record_secret_found(secret_id: StringName, display_name: String, lore_text: String) -> void:
@@ -66,11 +75,14 @@ func record_faction_interaction(faction_id: StringName, delta: int) -> void:
 	faction_interaction.emit(faction_id, delta)
 
 
-func register_secret(_secret_id: StringName) -> void:
+func register_secret(secret_id: StringName) -> void:
 	## Scenes call this for each placed secret marker so the counter denominator
-	## reflects what's actually findable in the player's world. We don't track
-	## ids here because the journal must not leak unfound secrets.
-	_registered_secret_count += 1
+	## reflects what's actually findable. Idempotent — re-registering the same
+	## id on scene revisit is a no-op, and the journal never exposes the ids
+	## of unfound secrets.
+	if secret_id == &"":
+		return
+	_registered_secret_ids[secret_id] = true
 
 
 func get_secrets_found_count() -> int:
@@ -78,7 +90,7 @@ func get_secrets_found_count() -> int:
 
 
 func get_secrets_known_count() -> int:
-	return _registered_secret_count
+	return _registered_secret_ids.size()
 
 
 func get_locations_visited() -> Dictionary:
@@ -119,16 +131,23 @@ func reset() -> void:
 	_secrets_found.clear()
 	_rumors_heard.clear()
 	_faction_standing.clear()
-	_registered_secret_count = 0
+	_registered_secret_ids.clear()
 
 
 func to_save_dict() -> Dictionary:
+	# Persist the registered_secret_ids set as a list so the "X / Y" counter
+	# survives load even before scenes have re-_ready'd. Just the ids — no
+	# lore text — so unfound secrets stay anonymous to anyone reading saves.
+	var registered: Array[String] = []
+	for sid: StringName in _registered_secret_ids:
+		registered.append(String(sid))
 	return {
 		"locations_visited": _stringify_keys(_locations_visited),
 		"npcs_met": _stringify_keys(_npcs_met),
 		"secrets_found": _stringify_keys(_secrets_found),
 		"rumors_heard": _stringify_keys(_rumors_heard),
 		"faction_standing": _stringify_keys(_faction_standing),
+		"registered_secret_ids": registered,
 	}
 
 
@@ -139,6 +158,10 @@ func from_save_dict(data: Dictionary) -> void:
 	_secrets_found = _restore_dict_of_dicts(data.get("secrets_found", {}))
 	_rumors_heard = _restore_string_dict(data.get("rumors_heard", {}))
 	_faction_standing = _restore_int_dict(data.get("faction_standing", {}))
+	var registered: Variant = data.get("registered_secret_ids", [])
+	if registered is Array:
+		for v: Variant in registered:
+			_registered_secret_ids[StringName(str(v))] = true
 
 
 func _stringify_keys(d: Dictionary) -> Dictionary:

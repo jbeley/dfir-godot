@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://street_downtown"]
+[gd_scene load_steps=11 format=3 uid="uid://street_downtown"]
 
 [ext_resource type="Script" path="res://src/scenes/world/street_downtown.gd" id="1_street"]
 [ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
 [ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="5_secret"]
 [ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="6_spawn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/buildings/apartment.png" id="7_apt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/buildings/acme_office.png" id="8_acme"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/buildings/hospital.png" id="9_hosp"]
 
 [sub_resource type="RectangleShape2D" id="shape_secret"]
 size = Vector2(20, 20)
@@ -14,50 +17,62 @@ size = Vector2(20, 20)
 script = ExtResource("1_street")
 
 [node name="Sky" type="ColorRect" parent="."]
-offset_right = 960.0
+offset_right = 1280.0
 offset_bottom = 110.0
 color = Color(0.45, 0.5, 0.65, 1)
 
 [node name="Sidewalk" type="ColorRect" parent="."]
 offset_top = 110.0
-offset_right = 960.0
+offset_right = 1280.0
 offset_bottom = 270.0
 color = Color(0.32, 0.32, 0.35, 1)
 
 [node name="Road" type="ColorRect" parent="."]
 offset_top = 180.0
-offset_right = 960.0
+offset_right = 1280.0
 offset_bottom = 220.0
 color = Color(0.18, 0.18, 0.2, 1)
 
-[node name="ApartmentBldg" type="ColorRect" parent="."]
-offset_left = 60.0
-offset_top = 30.0
-offset_right = 200.0
-offset_bottom = 180.0
-color = Color(0.55, 0.42, 0.32, 1)
+[node name="ApartmentBldg" type="Sprite2D" parent="."]
+position = Vector2(130, 105)
+texture_filter = 0
+texture = ExtResource("7_apt")
+centered = true
 
-[node name="SiteBldg" type="ColorRect" parent="."]
-offset_left = 720.0
-offset_top = 30.0
-offset_right = 880.0
-offset_bottom = 180.0
-color = Color(0.42, 0.46, 0.5, 1)
+[node name="SiteBldg" type="Sprite2D" parent="."]
+position = Vector2(800, 105)
+texture_filter = 0
+texture = ExtResource("8_acme")
+centered = true
+
+[node name="HospitalBldg" type="Sprite2D" parent="."]
+position = Vector2(1120, 105)
+texture_filter = 0
+texture = ExtResource("9_hosp")
+centered = true
 
 [node name="ApartmentLabel" type="Label" parent="."]
-offset_left = 90.0
-offset_top = 80.0
-offset_right = 180.0
-offset_bottom = 96.0
+offset_left = 60.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 54.0
 text = "APARTMENT"
 horizontal_alignment = 1
 
 [node name="SiteLabel" type="Label" parent="."]
-offset_left = 740.0
-offset_top = 80.0
-offset_right = 860.0
-offset_bottom = 96.0
-text = "SITE"
+offset_left = 720.0
+offset_top = 40.0
+offset_right = 880.0
+offset_bottom = 54.0
+text = "ACME WIDGET"
+horizontal_alignment = 1
+
+[node name="HospitalLabel" type="Label" parent="."]
+offset_left = 1000.0
+offset_top = 40.0
+offset_right = 1240.0
+offset_bottom = 54.0
+text = "ST. CATHERINE'S"
 horizontal_alignment = 1
 
 [node name="ApartmentDoor" parent="." instance=ExtResource("3_door")]
@@ -68,9 +83,15 @@ prompt = "[E] Go inside (home)"
 
 [node name="SiteDoor" parent="." instance=ExtResource("3_door")]
 position = Vector2(800, 178)
-target_location = &"site_shell"
+target_location = &"site_acme_lobby"
 target_spawn = &"default"
-prompt = "[E] Enter the site"
+prompt = "[E] Enter Acme Widget Corp"
+
+[node name="HospitalDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(1120, 178)
+target_location = &"site_hospital_lobby"
+target_spawn = &"default"
+prompt = "[E] Enter St. Catherine's"
 
 [node name="FlavorNPC" parent="." instance=ExtResource("4_npc")]
 position = Vector2(440, 200)
@@ -100,6 +121,11 @@ position = Vector2(770, 200)
 script = ExtResource("6_spawn")
 id = &"from_site"
 
+[node name="FromHospitalSpawn" type="Marker2D" parent="."]
+position = Vector2(1090, 200)
+script = ExtResource("6_spawn")
+id = &"from_hospital"
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(150, 200)
 
@@ -108,5 +134,5 @@ position_smoothing_enabled = true
 position_smoothing_speed = 5.0
 limit_left = 0
 limit_top = 0
-limit_right = 960
+limit_right = 1280
 limit_bottom = 270

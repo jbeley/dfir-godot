@@ -22,6 +22,8 @@ func _init() -> void:
 	test_faction_standing_accumulates()
 	test_save_roundtrip_preserves_state()
 	test_register_secret_increments_known()
+	test_register_secret_dedupes_on_revisit()
+	test_archetype_locked_on_first_meet()
 	print("\n=== Results: %d passed, %d failed ===" % [_pass_count, _fail_count])
 	if _fail_count > 0:
 		print("FAILED")
@@ -115,6 +117,26 @@ func test_register_secret_increments_known() -> void:
 	jm.register_secret(&"a")
 	jm.register_secret(&"b")
 	assert_eq(jm.get_secrets_known_count(), 2)
+
+
+func test_register_secret_dedupes_on_revisit() -> void:
+	_test_name = "register_secret_dedupes_on_revisit"
+	var jm: Object = _make()
+	jm.register_secret(&"a")
+	jm.register_secret(&"a")
+	jm.register_secret(&"a")
+	assert_eq(jm.get_secrets_known_count(), 1)
+
+
+func test_archetype_locked_on_first_meet() -> void:
+	_test_name = "archetype_locked_on_first_meet"
+	var jm: Object = _make()
+	jm.record_npc_met(&"x", "X", "RECURRING", "first")
+	# Same NPC, different archetype label — archetype should NOT change.
+	jm.record_npc_met(&"x", "X", "FLAVOR", "later")
+	var npcs: Dictionary = jm.get_npcs_met()
+	assert_eq(npcs[&"x"]["archetype"], "RECURRING")
+	assert_eq(npcs[&"x"]["last_line"], "later")
 
 
 func assert_eq(got: Variant, expected: Variant) -> void:

@@ -1,0 +1,173 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_acme_cubes"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_acme_cubes.gd" id="1_cubes"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="5_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="6_secret"]
+
+[sub_resource type="RectangleShape2D" id="shape_corkboard"]
+size = Vector2(36, 22)
+
+[node name="SiteAcmeCubes" type="Node2D"]
+script = ExtResource("1_cubes")
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 270.0
+color = Color(0.62, 0.6, 0.58, 1)
+
+[node name="WallTop" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 28.0
+color = Color(0.5, 0.48, 0.46, 1)
+
+[node name="Cube1" type="ColorRect" parent="."]
+offset_left = 100.0
+offset_top = 60.0
+offset_right = 180.0
+offset_bottom = 130.0
+color = Color(0.45, 0.4, 0.35, 1)
+
+[node name="Cube2" type="ColorRect" parent="."]
+offset_left = 220.0
+offset_top = 60.0
+offset_right = 300.0
+offset_bottom = 130.0
+color = Color(0.45, 0.4, 0.35, 1)
+
+[node name="Cube3" type="ColorRect" parent="."]
+offset_left = 340.0
+offset_top = 60.0
+offset_right = 420.0
+offset_bottom = 130.0
+color = Color(0.45, 0.4, 0.35, 1)
+
+[node name="Cube4" type="ColorRect" parent="."]
+offset_left = 460.0
+offset_top = 60.0
+offset_right = 540.0
+offset_bottom = 130.0
+color = Color(0.45, 0.4, 0.35, 1)
+
+[node name="CoffeeStation" type="ColorRect" parent="."]
+offset_left = 540.0
+offset_top = 180.0
+offset_right = 600.0
+offset_bottom = 220.0
+color = Color(0.3, 0.2, 0.15, 1)
+
+[node name="CoffeeLabel" type="Label" parent="."]
+offset_left = 540.0
+offset_top = 192.0
+offset_right = 600.0
+offset_bottom = 204.0
+text = "coffee"
+horizontal_alignment = 1
+
+[node name="Sign" type="Label" parent="."]
+offset_left = 160.0
+offset_top = 8.0
+offset_right = 480.0
+offset_bottom = 24.0
+text = "ACME WIDGET CORP - OPERATIONS"
+horizontal_alignment = 1
+
+[node name="Phil" parent="." instance=ExtResource("4_npc")]
+position = Vector2(260, 95)
+npc_id = &"phil_garcia"
+display_name = "Phil from IT"
+archetype = 1
+first_line = "I told them we needed MFA."
+
+[node name="LobbyDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 220)
+target_location = &"site_acme_lobby"
+target_spawn = &"from_cubes"
+prompt = "[E] Back to lobby"
+
+[node name="LobbyDoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 232.0
+offset_right = 64.0
+offset_bottom = 244.0
+text = "lobby"
+horizontal_alignment = 1
+
+[node name="ServerDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(320, 220)
+target_location = &"site_acme_server"
+target_spawn = &"default"
+prompt = "[E] Open the server closet"
+
+[node name="ServerDoorLabel" type="Label" parent="."]
+offset_left = 296.0
+offset_top = 232.0
+offset_right = 344.0
+offset_bottom = 244.0
+text = "server"
+horizontal_alignment = 1
+
+[node name="AlleyDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(600, 220)
+target_location = &"site_acme_alley"
+target_spawn = &"default"
+prompt = "[E] Step out to the alley"
+
+[node name="AlleyDoorLabel" type="Label" parent="."]
+offset_left = 576.0
+offset_top = 232.0
+offset_right = 624.0
+offset_bottom = 244.0
+text = "alley"
+horizontal_alignment = 1
+
+[node name="Corkboard" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(370, 35)
+script = ExtResource("6_secret")
+secret_id = &"acme_corkboard_passwords"
+display_name = "Half-faded corkboard"
+lore_text = "A 'DON'T REUSE PASSWORDS' poster, sun-bleached. Underneath, three Post-its: 'wifi: acme2018', 'printer: 1234', and 'shared drive: see Phil'. Phil sees you reading. He doesn't make eye contact."
+prompt = "[E] Read the corkboard"
+
+[node name="CorkShape" type="CollisionShape2D" parent="Corkboard"]
+shape = SubResource("shape_corkboard")
+
+[node name="CorkIcon" type="ColorRect" parent="."]
+offset_left = 352.0
+offset_top = 24.0
+offset_right = 388.0
+offset_bottom = 46.0
+color = Color(0.7, 0.55, 0.35, 1)
+
+[node name="FromLobbySpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("5_spawn")
+id = &"from_lobby"
+
+[node name="FromServerSpawn" type="Marker2D" parent="."]
+position = Vector2(290, 220)
+script = ExtResource("5_spawn")
+id = &"from_server"
+
+[node name="FromAlleySpawn" type="Marker2D" parent="."]
+position = Vector2(560, 220)
+script = ExtResource("5_spawn")
+id = &"from_alley"
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("5_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 220)
+
+[node name="Camera" type="Camera2D" parent="Player"]
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+limit_left = 0
+limit_top = 0
+limit_right = 640
+limit_bottom = 270

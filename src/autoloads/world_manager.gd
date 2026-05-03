@@ -17,12 +17,16 @@ func travel_to(location_id: StringName, spawn_id: StringName = &"default") -> vo
 	if loc == null:
 		push_error("WorldManager: unknown location '%s'" % location_id)
 		return
+	# Verify the destination scene actually exists *before* we mutate state.
+	# Otherwise a typo / parse-error scene leaves current_location_id pointing
+	# at a place we never reached.
+	if not ResourceLoader.exists(loc.scene_path, "PackedScene"):
+		push_error("WorldManager: scene missing for '%s' at %s" % [location_id, loc.scene_path])
+		return
 	pending_spawn_id = spawn_id
 	current_location_id = location_id
 	_record_discovery(location_id)
 	location_changed.emit(location_id)
-	# Look up GameManager at runtime so this script loads cleanly in test
-	# harnesses where autoloads aren't registered.
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm and gm.has_method("change_scene"):
 		gm.change_scene(loc.scene_path)

@@ -90,26 +90,47 @@ func _setup_hotspots() -> void:
 func _on_interact_area_entered(area: Area2D) -> void:
 	if not area.is_in_group("hotspots"):
 		return
-	current_hotspot = area.name
-	player.set_nearby_interactable(area)
-	interaction_label.text = _get_hotspot_prompt(area.name)
+	_pick_active_hotspot()
+
+
+func _on_interact_area_exited(_area: Area2D) -> void:
+	_pick_active_hotspot()
+
+
+func _pick_active_hotspot() -> void:
+	# Pick the closest overlapping hotspot rather than the most recent. Stops
+	# the wandering cat from hijacking interact focus from the front door.
+	var interact_area: Area2D = player.get_node_or_null("InteractArea") as Area2D
+	if interact_area == null:
+		return
+	var best: Area2D = null
+	var best_dist: float = INF
+	for candidate in interact_area.get_overlapping_areas():
+		if not candidate.is_in_group("hotspots"):
+			continue
+		var d: float = (candidate.global_position - player.global_position).length()
+		if d < best_dist:
+			best = candidate
+			best_dist = d
+	if best == null:
+		if current_hotspot != "":
+			current_hotspot = ""
+			player.clear_nearby_interactable(player.nearby_interactable)
+			interaction_label.visible = false
+			if interaction_bg:
+				interaction_bg.visible = false
+			_hide_hotspot_highlight()
+		return
+	if best.name == current_hotspot:
+		return
+	current_hotspot = best.name
+	player.set_nearby_interactable(best)
+	interaction_label.text = _get_hotspot_prompt(best.name)
 	interaction_label.visible = true
 	if interaction_bg:
 		interaction_bg.visible = true
-	_show_hotspot_highlight(area)
+	_show_hotspot_highlight(best)
 	SfxBank.play("menu_move")
-
-
-func _on_interact_area_exited(area: Area2D) -> void:
-	if not area.is_in_group("hotspots"):
-		return
-	if current_hotspot == area.name:
-		current_hotspot = ""
-		player.clear_nearby_interactable(area)
-		interaction_label.visible = false
-		if interaction_bg:
-			interaction_bg.visible = false
-		_hide_hotspot_highlight()
 
 
 func _show_hotspot_highlight(area: Area2D) -> void:

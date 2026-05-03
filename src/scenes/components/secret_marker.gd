@@ -15,11 +15,16 @@ signal revealed(marker: SecretMarker)
 func _ready() -> void:
 	add_to_group("hotspots")
 	if secret_id != &"":
-		JournalManager.register_secret(secret_id)
+		var journal: Node = get_node_or_null("/root/JournalManager")
+		if journal:
+			journal.register_secret(secret_id)
 
 
 func get_prompt() -> String:
-	if secret_id != &"" and JournalManager.has_found_secret(secret_id):
+	if secret_id == &"":
+		return prompt
+	var journal: Node = get_node_or_null("/root/JournalManager")
+	if journal and journal.has_found_secret(secret_id):
 		return ""
 	return prompt
 
@@ -27,7 +32,10 @@ func get_prompt() -> String:
 func interact() -> void:
 	if secret_id == &"":
 		return
-	if JournalManager.has_found_secret(secret_id):
+	var journal: Node = get_node_or_null("/root/JournalManager")
+	if journal == null:
 		return
-	JournalManager.record_secret_found(secret_id, display_name, lore_text)
+	if journal.has_found_secret(secret_id):
+		return
+	journal.record_secret_found(secret_id, display_name, lore_text)
 	revealed.emit(self)

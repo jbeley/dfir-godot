@@ -27,11 +27,37 @@ func _ready() -> void:
 	_position_player_at_spawn()
 	_build_prompt_ui()
 	_wire_interactions()
+	_wire_default_npc_and_secret_handlers()
 	if attach_hud and not _has_hud():
 		add_child(HUD_SCENE.instantiate())
 	if location_id != &"":
 		JournalManager.record_location_visited(location_id)
 	GameManager.change_state(GameManager.GameState.PLAYING)
+
+
+func _wire_default_npc_and_secret_handlers() -> void:
+	for child in get_children():
+		if child is WorldNPC and not child.dialogue_requested.is_connected(_on_npc_dialogue_default):
+			(child as WorldNPC).dialogue_requested.connect(_on_npc_dialogue_default)
+		if child is SecretMarker and not child.revealed.is_connected(_on_secret_revealed_default):
+			(child as SecretMarker).revealed.connect(_on_secret_revealed_default)
+		if (
+			child is SurveillanceMarker
+			and not child.observed.is_connected(_on_surveillance_observed_default)
+		):
+			(child as SurveillanceMarker).observed.connect(_on_surveillance_observed_default)
+
+
+func _on_npc_dialogue_default(npc: WorldNPC) -> void:
+	show_lore_popup(npc.display_name, npc.get_current_line())
+
+
+func _on_secret_revealed_default(marker: SecretMarker) -> void:
+	show_lore_popup(marker.display_name, marker.lore_text)
+
+
+func _on_surveillance_observed_default(marker: SurveillanceMarker) -> void:
+	show_lore_popup(marker.display_name, marker.observation_text)
 
 
 func _ensure_player() -> void:
@@ -100,21 +126,47 @@ func _wire_interactions() -> void:
 func _on_interact_area_entered(area: Area2D) -> void:
 	if not area.is_in_group("hotspots"):
 		return
-	var prompt_text: String = _hotspot_prompt(area)
-	if prompt_text == "":
+	_pick_active_hotspot()
+
+
+func _on_interact_area_exited(_area: Area2D) -> void:
+	_pick_active_hotspot()
+
+
+func _pick_active_hotspot() -> void:
+	# Look at every hotspot the player's InteractArea currently overlaps and
+	# pick the closest one. Fixes the bug where a wandering cat or another
+	# moving NPC could "steal" focus from a door just by walking past.
+	var interact_area: Area2D = player.get_node_or_null("InteractArea") as Area2D
+	if interact_area == null:
+		_clear_hotspot()
 		return
-	_current_hotspot = area
-	player.set_nearby_interactable(area)
-	_prompt_label.text = prompt_text
+	var best: Area2D = null
+	var best_dist: float = INF
+	for candidate in interact_area.get_overlapping_areas():
+		if not candidate.is_in_group("hotspots"):
+			continue
+		var prompt_text: String = _hotspot_prompt(candidate)
+		if prompt_text == "":
+			continue
+		var d: float = (candidate.global_position - player.global_position).length()
+		if d < best_dist:
+			best = candidate
+			best_dist = d
+	if best == null:
+		_clear_hotspot()
+		return
+	_current_hotspot = best
+	player.set_nearby_interactable(best)
+	_prompt_label.text = _hotspot_prompt(best)
 	_prompt_label.visible = true
 	_prompt_bg.visible = true
 
 
-func _on_interact_area_exited(area: Area2D) -> void:
-	if area != _current_hotspot:
-		return
+func _clear_hotspot() -> void:
+	if _current_hotspot != null:
+		player.clear_nearby_interactable(_current_hotspot)
 	_current_hotspot = null
-	player.clear_nearby_interactable(area)
 	_prompt_label.visible = false
 	_prompt_bg.visible = false
 

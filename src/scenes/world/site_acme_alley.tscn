@@ -1,0 +1,135 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_acme_alley"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_acme_alley.gd" id="1_alley"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="5_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/surveillance_marker.gd" id="6_surv"]
+
+[sub_resource type="RectangleShape2D" id="shape_van"]
+size = Vector2(56, 28)
+
+[node name="SiteAcmeAlley" type="Node2D"]
+script = ExtResource("1_alley")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 80.0
+color = Color(0.32, 0.34, 0.4, 1)
+
+[node name="WallBack" type="ColorRect" parent="."]
+offset_top = 30.0
+offset_right = 480.0
+offset_bottom = 110.0
+color = Color(0.42, 0.36, 0.32, 1)
+
+[node name="Pavement" type="ColorRect" parent="."]
+offset_top = 110.0
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.27, 0.27, 0.29, 1)
+
+[node name="Dumpster" type="ColorRect" parent="."]
+offset_left = 80.0
+offset_top = 130.0
+offset_right = 140.0
+offset_bottom = 170.0
+color = Color(0.2, 0.35, 0.25, 1)
+
+[node name="DumpsterLabel" type="Label" parent="."]
+offset_left = 80.0
+offset_top = 142.0
+offset_right = 140.0
+offset_bottom = 156.0
+text = "trash"
+horizontal_alignment = 1
+
+[node name="LoadingBay" type="ColorRect" parent="."]
+offset_left = 320.0
+offset_top = 56.0
+offset_right = 460.0
+offset_bottom = 110.0
+color = Color(0.18, 0.18, 0.2, 1)
+
+[node name="LoadingLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 76.0
+offset_right = 460.0
+offset_bottom = 90.0
+text = "LOADING DOCK"
+horizontal_alignment = 1
+
+[node name="Graffiti" type="Label" parent="."]
+offset_left = 200.0
+offset_top = 50.0
+offset_right = 280.0
+offset_bottom = 70.0
+text = "PWN3D"
+horizontal_alignment = 1
+
+[node name="Janitor" parent="." instance=ExtResource("4_npc")]
+position = Vector2(120, 200)
+npc_id = &"alley_janitor"
+display_name = "The janitor"
+archetype = 2
+prompt_override = "[E] Talk to the janitor"
+first_line = "Thirty-one years on this dock. I see things."
+
+[node name="Mike" parent="." instance=ExtResource("4_npc")]
+position = Vector2(380, 230)
+npc_id = &"darklock_mike"
+display_name = "Mike"
+archetype = 3
+faction_id = &"darklock"
+prompt_override = "[E] See what Mike wants"
+first_line = "Hey. You're the consultant, right?"
+
+[node name="WhiteVan" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(240, 130)
+script = ExtResource("6_surv")
+marker_id = &"acme_alley_van"
+display_name = "Parked white van"
+observation_text = "Plain panel van. Window tint past legal. Engine warm. The driver pretends to read a newspaper as you walk by — newspapers are not really a thing anymore."
+faction_id = &"darklock"
+heat_amount = 12.0
+prompt = "[E] Take a closer look at the van"
+
+[node name="VanShape" type="CollisionShape2D" parent="WhiteVan"]
+shape = SubResource("shape_van")
+
+[node name="VanBody" type="ColorRect" parent="."]
+offset_left = 212.0
+offset_top = 116.0
+offset_right = 268.0
+offset_bottom = 144.0
+color = Color(0.92, 0.92, 0.9, 1)
+
+[node name="VanWindow" type="ColorRect" parent="."]
+offset_left = 220.0
+offset_top = 120.0
+offset_right = 240.0
+offset_bottom = 130.0
+color = Color(0.15, 0.15, 0.18, 1)
+
+[node name="CubesDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 230)
+target_location = &"site_acme_cubes"
+target_spawn = &"from_alley"
+prompt = "[E] Back inside"
+
+[node name="DoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 240.0
+offset_right = 64.0
+offset_bottom = 252.0
+text = "inside"
+horizontal_alignment = 1
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 230)
+script = ExtResource("5_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 230)

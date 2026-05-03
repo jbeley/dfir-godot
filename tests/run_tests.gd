@@ -15,6 +15,7 @@ func _init() -> void:
 		"res://tests/test_world_manager.gd",
 		"res://tests/test_journal_manager.gd",
 		"res://tests/test_heat_manager.gd",
+		"res://tests/test_world_npc.gd",
 	]
 
 	var all_passed := true

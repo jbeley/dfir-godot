@@ -3,17 +3,31 @@
 [ext_resource type="Script" path="res://src/scenes/components/world_npc.gd" id="1_npc"]
 
 [sub_resource type="RectangleShape2D" id="shape_npc"]
-size = Vector2(16, 16)
+size = Vector2(16, 20)
 
 [node name="WorldNPC" type="Area2D" groups=["hotspots"]]
 script = ExtResource("1_npc")
 
-[node name="Sprite" type="ColorRect" parent="."]
+[node name="Placeholder" type="ColorRect" parent="."]
 offset_left = -6.0
 offset_top = -10.0
 offset_right = 6.0
 offset_bottom = 6.0
 color = Color(0.7, 0.55, 0.4, 1)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(0, -2)
+texture_filter = 0
+centered = true
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -22.0
+offset_right = 40.0
+offset_bottom = -12.0
+text = "NPC"
+horizontal_alignment = 1
+mouse_filter = 2
 
 [node name="Shape" type="CollisionShape2D" parent="."]
 shape = SubResource("shape_npc")

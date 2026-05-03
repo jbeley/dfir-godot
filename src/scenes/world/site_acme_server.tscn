@@ -1,0 +1,149 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_acme_server"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_acme_server.gd" id="1_server"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="4_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="5_secret"]
+
+[sub_resource type="RectangleShape2D" id="shape_artifact"]
+size = Vector2(20, 24)
+
+[sub_resource type="RectangleShape2D" id="shape_artifact2"]
+size = Vector2(22, 18)
+
+[node name="SiteAcmeServer" type="Node2D"]
+script = ExtResource("1_server")
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.2, 0.22, 0.26, 1)
+
+[node name="WallTop" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 28.0
+color = Color(0.13, 0.14, 0.17, 1)
+
+[node name="Rack1" type="ColorRect" parent="."]
+offset_left = 80.0
+offset_top = 50.0
+offset_right = 130.0
+offset_bottom = 170.0
+color = Color(0.1, 0.11, 0.13, 1)
+
+[node name="Rack1LED" type="ColorRect" parent="."]
+offset_left = 86.0
+offset_top = 56.0
+offset_right = 92.0
+offset_bottom = 60.0
+color = Color(0.0, 0.85, 0.0, 1)
+
+[node name="Rack1LED2" type="ColorRect" parent="."]
+offset_left = 86.0
+offset_top = 64.0
+offset_right = 92.0
+offset_bottom = 68.0
+color = Color(0.85, 0.4, 0.0, 1)
+
+[node name="Rack2" type="ColorRect" parent="."]
+offset_left = 200.0
+offset_top = 50.0
+offset_right = 250.0
+offset_bottom = 170.0
+color = Color(0.1, 0.11, 0.13, 1)
+
+[node name="Rack2LED" type="ColorRect" parent="."]
+offset_left = 206.0
+offset_top = 56.0
+offset_right = 212.0
+offset_bottom = 60.0
+color = Color(0.0, 0.85, 0.0, 1)
+
+[node name="UPS" type="ColorRect" parent="."]
+offset_left = 320.0
+offset_top = 110.0
+offset_right = 380.0
+offset_bottom = 170.0
+color = Color(0.18, 0.16, 0.13, 1)
+
+[node name="UPSLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 128.0
+offset_right = 380.0
+offset_bottom = 142.0
+text = "UPS"
+horizontal_alignment = 1
+
+[node name="OldCiscoPoster" type="ColorRect" parent="."]
+offset_left = 380.0
+offset_top = 40.0
+offset_right = 440.0
+offset_bottom = 80.0
+color = Color(0.85, 0.78, 0.6, 1)
+
+[node name="Sign" type="Label" parent="."]
+offset_left = 80.0
+offset_top = 8.0
+offset_right = 400.0
+offset_bottom = 24.0
+text = "SERVER CLOSET - DO NOT UNPLUG"
+horizontal_alignment = 1
+
+[node name="StickyNote" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(105, 175)
+script = ExtResource("5_secret")
+secret_id = &"conficker_sticky"
+display_name = "Yellow sticky note behind the rack"
+lore_text = "It says CONFICKER in faded marker. A list of IPs follows, half scratched out, half overwritten. Whoever wrote this watched a worm tour the planet in 2008. The note has been here longer than most of the staff."
+prompt = "[E] Reach behind the rack"
+
+[node name="StickyShape" type="CollisionShape2D" parent="StickyNote"]
+shape = SubResource("shape_artifact")
+
+[node name="StickyIcon" type="ColorRect" parent="."]
+offset_left = 96.0
+offset_top = 168.0
+offset_right = 116.0
+offset_bottom = 184.0
+color = Color(0.92, 0.88, 0.45, 1)
+
+[node name="GhostCD" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(410, 130)
+script = ExtResource("5_secret")
+secret_id = &"norton_ghost_cdrom"
+display_name = "Norton Ghost CD-ROM"
+lore_text = "A jewel case under a stack of patch cables. The disc inside is scratched, the label hand-dated 2004. Image-restore software from before the cloud existed. Would solve today's problem if anyone here remembered how to use it."
+prompt = "[E] Pick up the CD"
+
+[node name="GhostShape" type="CollisionShape2D" parent="GhostCD"]
+shape = SubResource("shape_artifact2")
+
+[node name="GhostIcon" type="ColorRect" parent="."]
+offset_left = 400.0
+offset_top = 122.0
+offset_right = 422.0
+offset_bottom = 138.0
+color = Color(0.7, 0.7, 0.78, 1)
+
+[node name="CubesDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 220)
+target_location = &"site_acme_cubes"
+target_spawn = &"from_server"
+prompt = "[E] Back to the cube farm"
+
+[node name="DoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 232.0
+offset_right = 64.0
+offset_bottom = 244.0
+text = "exit"
+horizontal_alignment = 1
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("4_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 220)

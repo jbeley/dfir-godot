@@ -1,0 +1,134 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_hospital_parking"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_hospital_parking.gd" id="1_parking"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="5_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/surveillance_marker.gd" id="6_surv"]
+
+[sub_resource type="RectangleShape2D" id="shape_suv"]
+size = Vector2(64, 32)
+
+[node name="SiteHospitalParking" type="Node2D"]
+script = ExtResource("1_parking")
+
+[node name="Sky" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 70.0
+color = Color(0.55, 0.6, 0.7, 1)
+
+[node name="HospitalWall" type="ColorRect" parent="."]
+offset_top = 30.0
+offset_right = 480.0
+offset_bottom = 110.0
+color = Color(0.65, 0.7, 0.74, 1)
+
+[node name="WallSign" type="Label" parent="."]
+offset_left = 60.0
+offset_top = 60.0
+offset_right = 420.0
+offset_bottom = 80.0
+text = "ST. CATHERINE'S - EAST ENTRANCE"
+horizontal_alignment = 1
+
+[node name="Pavement" type="ColorRect" parent="."]
+offset_top = 110.0
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.27, 0.27, 0.29, 1)
+
+[node name="ParkingStripe" type="ColorRect" parent="."]
+offset_left = 200.0
+offset_top = 115.0
+offset_right = 204.0
+offset_bottom = 175.0
+color = Color(0.95, 0.95, 0.6, 1)
+
+[node name="ParkingStripe2" type="ColorRect" parent="."]
+offset_left = 320.0
+offset_top = 115.0
+offset_right = 324.0
+offset_bottom = 175.0
+color = Color(0.95, 0.95, 0.6, 1)
+
+[node name="AmbulanceBay" type="ColorRect" parent="."]
+offset_left = 320.0
+offset_top = 56.0
+offset_right = 460.0
+offset_bottom = 110.0
+color = Color(0.85, 0.85, 0.88, 1)
+
+[node name="AmbulanceLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 76.0
+offset_right = 460.0
+offset_bottom = 90.0
+text = "AMBULANCE BAY"
+horizontal_alignment = 1
+
+[node name="Chaplain" parent="." instance=ExtResource("4_npc")]
+position = Vector2(120, 200)
+npc_id = &"hospital_chaplain"
+display_name = "The chaplain"
+archetype = 2
+prompt_override = "[E] Talk to the chaplain"
+first_line = "I sit out here every shift. People come out to cry."
+
+[node name="Devon" parent="." instance=ExtResource("4_npc")]
+position = Vector2(380, 235)
+npc_id = &"darklock_devon"
+display_name = "Devon"
+archetype = 3
+faction_id = &"darklock"
+prompt_override = "[E] See what Devon wants"
+first_line = "You're the consultant from Acme."
+
+[node name="WhiteSUV" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(240, 130)
+script = ExtResource("6_surv")
+marker_id = &"hospital_parking_suv"
+display_name = "Parked white SUV"
+observation_text = "Newer than the Acme van. Two men inside, alternating who walks the perimeter every twenty minutes. They have stopped pretending. Whoever they are, they want you to know they're here."
+faction_id = &"darklock"
+heat_amount = 18.0
+prompt = "[E] Watch the SUV"
+
+[node name="SUVShape" type="CollisionShape2D" parent="WhiteSUV"]
+shape = SubResource("shape_suv")
+
+[node name="SUVBody" type="ColorRect" parent="."]
+offset_left = 208.0
+offset_top = 114.0
+offset_right = 272.0
+offset_bottom = 146.0
+color = Color(0.93, 0.93, 0.92, 1)
+
+[node name="SUVWindow" type="ColorRect" parent="."]
+offset_left = 218.0
+offset_top = 122.0
+offset_right = 262.0
+offset_bottom = 134.0
+color = Color(0.1, 0.1, 0.12, 1)
+
+[node name="NurseDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 230)
+target_location = &"site_hospital_nurse"
+target_spawn = &"from_parking"
+prompt = "[E] Back inside"
+
+[node name="DoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 240.0
+offset_right = 64.0
+offset_bottom = 252.0
+text = "inside"
+horizontal_alignment = 1
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 230)
+script = ExtResource("5_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 230)

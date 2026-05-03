@@ -18,6 +18,10 @@ const SFX_FILES := {
 	"menu_move": "res://assets/audio/sfx/menu_move.wav",
 	"menu_select": "res://assets/audio/sfx/menu_select.wav",
 	"promotion": "res://assets/audio/sfx/promotion.wav",
+	"secret_found": "res://assets/audio/sfx/secret_found.wav",
+	"location_arrived": "res://assets/audio/sfx/location_arrived.wav",
+	"heat_warning": "res://assets/audio/sfx/heat_warning.wav",
+	"journal_open": "res://assets/audio/sfx/journal_open.wav",
 }
 
 

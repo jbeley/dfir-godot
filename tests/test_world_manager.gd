@@ -16,6 +16,10 @@ var _test_name := ""
 func _init() -> void:
 	print("=== WorldManager Tests ===\n")
 	test_registry_has_core_locations()
+	test_registry_has_acme_locations()
+	test_registry_has_hospital_locations()
+	test_acme_lobby_records_darklock_faction()
+	test_hospital_lobby_records_darklock_faction()
 	test_get_location_unknown_returns_null()
 	test_consume_spawn_id_default()
 	test_save_roundtrip_preserves_state()
@@ -38,6 +42,40 @@ func test_registry_has_core_locations() -> void:
 	assert_true(all.has("apartment"))
 	assert_true(all.has("street_downtown"))
 	assert_true(all.has("site_shell"))
+
+
+func test_registry_has_acme_locations() -> void:
+	_test_name = "registry_has_acme_locations"
+	var all := LocationsRegistry.all()
+	assert_true(all.has("site_acme_lobby"))
+	assert_true(all.has("site_acme_cubes"))
+	assert_true(all.has("site_acme_server"))
+	assert_true(all.has("site_acme_alley"))
+
+
+func test_acme_lobby_records_darklock_faction() -> void:
+	_test_name = "acme_lobby_records_darklock_faction"
+	var lobby: Resource = LocationsRegistry.get_location(&"site_acme_lobby")
+	assert_true(lobby != null)
+	var factions: Array[StringName] = lobby.faction_presence
+	assert_true(factions.has(&"darklock"))
+
+
+func test_registry_has_hospital_locations() -> void:
+	_test_name = "registry_has_hospital_locations"
+	var all := LocationsRegistry.all()
+	assert_true(all.has("site_hospital_lobby"))
+	assert_true(all.has("site_hospital_nurse"))
+	assert_true(all.has("site_hospital_server"))
+	assert_true(all.has("site_hospital_parking"))
+
+
+func test_hospital_lobby_records_darklock_faction() -> void:
+	_test_name = "hospital_lobby_records_darklock_faction"
+	var lobby: Resource = LocationsRegistry.get_location(&"site_hospital_lobby")
+	assert_true(lobby != null)
+	var factions: Array[StringName] = lobby.faction_presence
+	assert_true(factions.has(&"darklock"))
 
 
 func test_get_location_unknown_returns_null() -> void:

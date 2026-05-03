@@ -1,7 +1,8 @@
 extends CanvasLayer
 ## On-screen touch controls for mobile/tablet.
 ## Virtual joystick (left) + action buttons (right).
-## Always visible on web builds.
+## Hidden on desktop. On web, hidden until the first touch event proves the
+## device actually has a touchscreen — keyboard players see a clean canvas.
 
 var _joystick_center := Vector2.ZERO
 var _joystick_touching := false
@@ -17,7 +18,7 @@ func _ready() -> void:
 	layer = 50
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-	_is_touch_active = _should_show()
+	_is_touch_active = _should_show_initially()
 
 	$BtnInteract.pressed.connect(_on_interact)
 	$BtnPause.pressed.connect(_on_pause)
@@ -26,17 +27,32 @@ func _ready() -> void:
 	_update_visibility()
 
 
-func _should_show() -> bool:
+func _should_show_initially() -> bool:
+	# Native mobile builds always start with controls visible.
 	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
 		return true
-	if OS.has_feature("web"):
+	# Touchscreen-only kiosks / known touch laptops.
+	if DisplayServer.is_touchscreen_available() and not OS.has_feature("web"):
 		return true
+	# On web, wait for an actual touch event. Keyboard users get a clean canvas.
+	return false
+
+
+func _is_real_touch(event: InputEvent) -> bool:
+	# Filter out mouse-emulated touches so desktop browsers don't activate
+	# the mobile UI on click. A real touchscreen always reports
+	# DisplayServer.is_touchscreen_available() == true.
+	if not (event is InputEventScreenTouch or event is InputEventScreenDrag):
+		return false
 	return DisplayServer.is_touchscreen_available()
 
 
 func _input(event: InputEvent) -> void:
-	# Auto-show on first touch
-	if not _is_touch_active and (event is InputEventScreenTouch or event is InputEventScreenDrag):
+	# Auto-show on first *real* touch event. We have to filter out events
+	# that the engine emulated from mouse clicks (project.godot enables
+	# emulate_touch_from_mouse for the joystick component); otherwise every
+	# desktop mouse click would activate the mobile UI.
+	if not _is_touch_active and _is_real_touch(event):
 		_is_touch_active = true
 		_update_visibility()
 

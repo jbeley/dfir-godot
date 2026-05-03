@@ -3,11 +3,32 @@ extends Node
 
 enum GameState { MENU, PLAYING, PAUSED }
 
+const FADE_DURATION: float = 0.18
+
 var current_state: GameState = GameState.MENU
 
 signal state_changed(new_state: GameState)
 signal scene_transition_started
 signal scene_transition_finished
+
+var _fade_layer: CanvasLayer
+var _fade_rect: ColorRect
+
+
+func _ready() -> void:
+	_setup_fade_layer()
+
+
+func _setup_fade_layer() -> void:
+	_fade_layer = CanvasLayer.new()
+	_fade_layer.layer = 90
+	_fade_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_fade_layer)
+	_fade_rect = ColorRect.new()
+	_fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade_rect.color = Color(0, 0, 0, 0)
+	_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade_layer.add_child(_fade_rect)
 
 
 func change_state(new_state: GameState) -> void:
@@ -19,14 +40,25 @@ func change_state(new_state: GameState) -> void:
 
 func change_scene(scene_path: String) -> void:
 	scene_transition_started.emit()
+	await _fade_to(1.0)
 	# Use Godot's built-in scene changer - handles freeing old scene safely
 	var err := get_tree().change_scene_to_file(scene_path)
 	if err != OK:
 		push_error("Failed to change scene to: %s (error %d)" % [scene_path, err])
+		await _fade_to(0.0)
 		return
 	# Wait for the scene to be ready
 	await get_tree().tree_changed
+	await _fade_to(0.0)
 	scene_transition_finished.emit()
+
+
+func _fade_to(target_alpha: float) -> void:
+	if _fade_rect == null:
+		return
+	var tween: Tween = create_tween()
+	tween.tween_property(_fade_rect, "color:a", target_alpha, FADE_DURATION)
+	await tween.finished
 
 
 func save_game(slot: int = 0) -> void:

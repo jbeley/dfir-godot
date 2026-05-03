@@ -1,0 +1,167 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_hospital_nurse"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_hospital_nurse.gd" id="1_nurse"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="PackedScene" uid="uid://world_npc" path="res://src/scenes/components/world_npc.tscn" id="4_npc"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="5_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="6_secret"]
+
+[sub_resource type="RectangleShape2D" id="shape_clipboard"]
+size = Vector2(20, 26)
+
+[node name="SiteHospitalNurse" type="Node2D"]
+script = ExtResource("1_nurse")
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 270.0
+color = Color(0.84, 0.86, 0.78, 1)
+
+[node name="WallTop" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 28.0
+color = Color(0.45, 0.55, 0.55, 1)
+
+[node name="Counter" type="ColorRect" parent="."]
+offset_left = 80.0
+offset_top = 50.0
+offset_right = 560.0
+offset_bottom = 100.0
+color = Color(0.92, 0.9, 0.85, 1)
+
+[node name="CounterLabel" type="Label" parent="."]
+offset_left = 240.0
+offset_top = 64.0
+offset_right = 400.0
+offset_bottom = 80.0
+text = "NURSE STATION"
+horizontal_alignment = 1
+
+[node name="CrashCart" type="ColorRect" parent="."]
+offset_left = 540.0
+offset_top = 180.0
+offset_right = 600.0
+offset_bottom = 220.0
+color = Color(0.9, 0.4, 0.3, 1)
+
+[node name="CrashLabel" type="Label" parent="."]
+offset_left = 540.0
+offset_top = 192.0
+offset_right = 600.0
+offset_bottom = 204.0
+text = "crash cart"
+horizontal_alignment = 1
+
+[node name="Sign" type="Label" parent="."]
+offset_left = 160.0
+offset_top = 8.0
+offset_right = 480.0
+offset_bottom = 24.0
+text = "ST. CATHERINE'S - WARDS"
+horizontal_alignment = 1
+
+[node name="DrPatel" parent="." instance=ExtResource("4_npc")]
+position = Vector2(220, 130)
+npc_id = &"asha_patel"
+display_name = "Dr. Asha Patel"
+archetype = 0
+first_line = "I'm Asha Patel. CISO."
+
+[node name="Shawn" parent="." instance=ExtResource("4_npc")]
+position = Vector2(420, 140)
+npc_id = &"shawn_it"
+display_name = "Shawn from night IT"
+archetype = 1
+first_line = "Been here since 7pm yesterday."
+
+[node name="LobbyDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 220)
+target_location = &"site_hospital_lobby"
+target_spawn = &"from_nurse"
+prompt = "[E] Back to lobby"
+
+[node name="LobbyDoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 232.0
+offset_right = 64.0
+offset_bottom = 244.0
+text = "lobby"
+horizontal_alignment = 1
+
+[node name="ServerDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(320, 220)
+target_location = &"site_hospital_server"
+target_spawn = &"default"
+prompt = "[E] Open the IT room"
+
+[node name="ServerDoorLabel" type="Label" parent="."]
+offset_left = 296.0
+offset_top = 232.0
+offset_right = 344.0
+offset_bottom = 244.0
+text = "server"
+horizontal_alignment = 1
+
+[node name="ParkingDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(600, 220)
+target_location = &"site_hospital_parking"
+target_spawn = &"default"
+prompt = "[E] Step out to the parking lot"
+
+[node name="ParkingDoorLabel" type="Label" parent="."]
+offset_left = 576.0
+offset_top = 232.0
+offset_right = 624.0
+offset_bottom = 244.0
+text = "parking"
+horizontal_alignment = 1
+
+[node name="Clipboard" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(360, 35)
+script = ExtResource("6_secret")
+secret_id = &"hospital_paper_census"
+display_name = "Paper census clipboard"
+lore_text = "Hand-ruled. 'Daily Census, Manual Method.' Last entry three weeks ago, then nothing. Someone gave up. Someone else picked it up this morning at 04:11."
+prompt = "[E] Read the clipboard"
+
+[node name="ClipShape" type="CollisionShape2D" parent="Clipboard"]
+shape = SubResource("shape_clipboard")
+
+[node name="ClipIcon" type="ColorRect" parent="."]
+offset_left = 350.0
+offset_top = 22.0
+offset_right = 370.0
+offset_bottom = 48.0
+color = Color(0.65, 0.5, 0.3, 1)
+
+[node name="FromLobbySpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("5_spawn")
+id = &"from_lobby"
+
+[node name="FromServerSpawn" type="Marker2D" parent="."]
+position = Vector2(290, 220)
+script = ExtResource("5_spawn")
+id = &"from_server"
+
+[node name="FromParkingSpawn" type="Marker2D" parent="."]
+position = Vector2(560, 220)
+script = ExtResource("5_spawn")
+id = &"from_parking"
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("5_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 220)
+
+[node name="Camera" type="Camera2D" parent="Player"]
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+limit_left = 0
+limit_top = 0
+limit_right = 640
+limit_bottom = 270

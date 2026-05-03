@@ -6,6 +6,7 @@ extends CanvasLayer
 @onready var case_count_label: Label = %CaseCountLabel
 @onready var stats_label: Label = %StatsLabel
 @onready var notification_label: Label = %NotificationLabel
+@onready var heat_label: Label = %HeatLabel
 
 var _notification_timer: float = 0.0
 
@@ -17,8 +18,11 @@ func _ready() -> void:
 	CaseManager.case_deadline_warning.connect(_on_deadline_warning)
 	ReputationManager.stats_changed.connect(_update_stats)
 	ReputationManager.promoted.connect(_on_promoted)
+	if HeatManager and HeatManager.has_signal("heat_changed"):
+		HeatManager.heat_changed.connect(_on_heat_changed)
 	notification_label.visible = false
 	_update_all()
+	_update_heat()
 
 
 func _process(delta: float) -> void:
@@ -75,3 +79,36 @@ func _show_notification(text: String, duration: float = 3.0) -> void:
 	notification_label.text = text
 	notification_label.visible = true
 	_notification_timer = duration
+
+
+func _on_heat_changed(_faction_id: StringName, _heat: float) -> void:
+	_update_heat()
+
+
+func _update_heat() -> void:
+	if heat_label == null:
+		return
+	if HeatManager == null:
+		heat_label.visible = false
+		return
+	var standings: Dictionary = HeatManager.get_all_heat()
+	var parts: PackedStringArray = PackedStringArray()
+	var hottest: float = 0.0
+	for fid: Variant in standings:
+		var amt: float = float(standings[fid])
+		if amt <= 0.0:
+			continue
+		hottest = maxf(hottest, amt)
+		parts.append("%s:%d" % [String(fid), int(amt)])
+	if parts.is_empty():
+		heat_label.visible = false
+		return
+	heat_label.visible = true
+	heat_label.text = "Heat | " + " ".join(parts)
+	# Tint warmer as heat climbs.
+	var color: Color = Color(0.85, 0.85, 0.7)
+	if hottest >= HeatManager.THRESHOLD_HOSTILE:
+		color = Color(1.0, 0.45, 0.4)
+	elif hottest >= HeatManager.THRESHOLD_NOTICED:
+		color = Color(1.0, 0.75, 0.4)
+	heat_label.add_theme_color_override("font_color", color)
