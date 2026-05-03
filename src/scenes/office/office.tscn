@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/office/phone.png" id="7_phone"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/bookshelf.png" id="8_shelf"]
 [ext_resource type="PackedScene" uid="uid://cat_npc" path="res://src/scenes/office/cat_npc.tscn" id="12_cat_npc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/doors/wood.png" id="13_door_wood"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/window.png" id="9_window"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/cat.png" id="10_cat"]
 [ext_resource type="Texture2D" path="res://assets/sprites/office/rug.png" id="11_rug"]
@@ -170,14 +171,10 @@ position = Vector2(440, 220)
 [node name="DefaultSpawn" type="Marker2D" parent="."]
 position = Vector2(240, 160)
 
-[node name="DoorSign" type="Label" parent="."]
-offset_left = 432.0
-offset_top = 220.0
-offset_right = 480.0
-offset_bottom = 232.0
-text = "front
-door"
-horizontal_alignment = 1
+[node name="FrontDoorSprite" type="Sprite2D" parent="."]
+position = Vector2(456, 232)
+texture_filter = 0
+texture = ExtResource("13_door_wood")
 
 [node name="Walls" type="StaticBody2D" parent="."]
 

@@ -12,15 +12,18 @@ func _ready() -> void:
 	GameManager.change_state(GameManager.GameState.MENU)
 	SfxBank.play_music("menu")
 
-	# Check for existing save
-	continue_btn.disabled = not GameManager.has_save()
+	# Hide Continue when no save exists, instead of dimming it. New players
+	# don't have to wonder what's behind the greyed-out option.
+	var has_save: bool = GameManager.has_save()
+	continue_btn.visible = has_save
+	continue_btn.disabled = not has_save
 
 	new_game_btn.pressed.connect(_on_new_game)
 	continue_btn.pressed.connect(_on_continue)
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 
-	version_label.text = "v0.2.0 - Phase 2"
+	version_label.text = "v0.2.1"
 
 	# Auto-focus first button for gamepad
 	new_game_btn.call_deferred("grab_focus")
