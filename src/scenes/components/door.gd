@@ -10,10 +10,22 @@ class_name Door
 @export var target_location: StringName = &""
 @export var target_spawn: StringName = &"default"
 @export var prompt: String = "[E] Enter"
+@export var sprite_texture: Texture2D
 
 
 func _ready() -> void:
 	add_to_group("hotspots")
+	const DoorSpriteRegistry := preload("res://src/systems/world/door_sprite_registry.gd")
+	var tex: Texture2D = sprite_texture
+	if tex == null and target_location != &"":
+		tex = DoorSpriteRegistry.sprite_for_target(target_location)
+	var sprite: Sprite2D = get_node_or_null("Sprite") as Sprite2D
+	if sprite and tex != null:
+		sprite.texture = tex
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var placeholder: ColorRect = get_node_or_null("Placeholder") as ColorRect
+		if placeholder:
+			placeholder.visible = false
 
 
 func get_prompt() -> String:

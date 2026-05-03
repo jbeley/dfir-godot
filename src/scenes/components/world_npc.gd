@@ -16,6 +16,8 @@ enum Archetype { RECURRING, FLAVOR, SECRET, FACTION }
 @export var lines: PackedStringArray = PackedStringArray()
 @export var prompt_override: String = ""
 @export var faction_id: StringName = &""
+@export var sprite_texture: Texture2D
+@export var name_label_visible: bool = true
 
 signal dialogue_requested(npc: WorldNPC)
 
@@ -24,6 +26,28 @@ var _line_index: int = 0
 
 func _ready() -> void:
 	add_to_group("hotspots")
+	_setup_visuals()
+
+
+func _setup_visuals() -> void:
+	const NpcSpriteRegistry := preload(
+		"res://src/systems/world/npc_sprite_registry.gd"
+	)
+	var sprite: Sprite2D = get_node_or_null("Sprite") as Sprite2D
+	# Inspector override wins; otherwise look up by npc_id.
+	var tex: Texture2D = sprite_texture
+	if tex == null and npc_id != &"":
+		tex = NpcSpriteRegistry.get_sprite(npc_id)
+	if sprite and tex != null:
+		sprite.texture = tex
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var placeholder: ColorRect = get_node_or_null("Placeholder") as ColorRect
+		if placeholder:
+			placeholder.visible = false
+	var name_label: Label = get_node_or_null("NameLabel") as Label
+	if name_label:
+		name_label.visible = name_label_visible
+		name_label.text = display_name
 
 
 func get_prompt() -> String:
