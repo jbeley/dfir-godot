@@ -43,9 +43,10 @@ func interact() -> void:
 	# Look up the journal autoload at runtime so this script also loads
 	# cleanly in test harnesses where autoloads aren't registered.
 	var journal: Node = get_node_or_null("/root/JournalManager")
-	if journal:
-		if npc_id != &"" and not journal.has_met_npc(npc_id):
-			journal.record_npc_met(npc_id, display_name, Archetype.keys()[archetype], line)
+	if journal and npc_id != &"":
+		# Always overwrite — last_line should be the most recent thing they
+		# said. JournalManager only fires npc_met on the first record.
+		journal.record_npc_met(npc_id, display_name, Archetype.keys()[archetype], line)
 		if faction_id != &"" and _line_index == 0:
 			journal.record_faction_interaction(faction_id, 1)
 	# Emit *before* advancing so the handler shows the line we just observed,

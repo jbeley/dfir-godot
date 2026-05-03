@@ -66,6 +66,38 @@ static func all() -> Dictionary:
 		true,
 		darklock
 	)
+	out["site_hospital_lobby"] = _make(
+		"site_hospital_lobby",
+		"St. Catherine's - Lobby",
+		"res://src/scenes/world/site_hospital_lobby.tscn",
+		LocationDataScript.Kind.SITE,
+		true,
+		darklock
+	)
+	out["site_hospital_nurse"] = _make(
+		"site_hospital_nurse",
+		"St. Catherine's - Wards",
+		"res://src/scenes/world/site_hospital_nurse.tscn",
+		LocationDataScript.Kind.SITE,
+		true,
+		darklock
+	)
+	out["site_hospital_server"] = _make(
+		"site_hospital_server",
+		"St. Catherine's - IT Room",
+		"res://src/scenes/world/site_hospital_server.tscn",
+		LocationDataScript.Kind.SITE,
+		true,
+		darklock
+	)
+	out["site_hospital_parking"] = _make(
+		"site_hospital_parking",
+		"St. Catherine's - Parking Lot",
+		"res://src/scenes/world/site_hospital_parking.tscn",
+		LocationDataScript.Kind.SITE,
+		true,
+		darklock
+	)
 	return out
 
 

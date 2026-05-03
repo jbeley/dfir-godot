@@ -33,12 +33,21 @@ func record_npc_met(
 ) -> void:
 	if npc_id == &"":
 		return
-	_npcs_met[npc_id] = {
-		"display_name": display_name,
-		"archetype": archetype,
-		"last_line": last_line,
-	}
-	npc_met.emit(npc_id)
+	# `npc_met` should fire only on the first encounter — subsequent calls
+	# just refresh display_name / last_line. archetype is locked on first meet
+	# so a downgrade (RECURRING -> FLAVOR) can't happen by accident.
+	var was_new: bool = not _npcs_met.has(npc_id)
+	if was_new:
+		_npcs_met[npc_id] = {
+			"display_name": display_name,
+			"archetype": archetype,
+			"last_line": last_line,
+		}
+		npc_met.emit(npc_id)
+	else:
+		var entry: Dictionary = _npcs_met[npc_id]
+		entry["display_name"] = display_name
+		entry["last_line"] = last_line
 
 
 func record_secret_found(secret_id: StringName, display_name: String, lore_text: String) -> void:

@@ -1,0 +1,136 @@
+[gd_scene load_steps=8 format=3 uid="uid://site_hospital_server"]
+
+[ext_resource type="Script" path="res://src/scenes/world/site_hospital_server.gd" id="1_server"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://src/scenes/office/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://door_component" path="res://src/scenes/components/door.tscn" id="3_door"]
+[ext_resource type="Script" path="res://src/scenes/components/spawn_point.gd" id="4_spawn"]
+[ext_resource type="Script" path="res://src/scenes/components/secret_marker.gd" id="5_secret"]
+
+[sub_resource type="RectangleShape2D" id="shape_artifact"]
+size = Vector2(22, 18)
+
+[sub_resource type="RectangleShape2D" id="shape_artifact2"]
+size = Vector2(20, 24)
+
+[node name="SiteHospitalServer" type="Node2D"]
+script = ExtResource("1_server")
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.22, 0.27, 0.3, 1)
+
+[node name="WallTop" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 28.0
+color = Color(0.13, 0.17, 0.2, 1)
+
+[node name="Rack1" type="ColorRect" parent="."]
+offset_left = 80.0
+offset_top = 50.0
+offset_right = 130.0
+offset_bottom = 170.0
+color = Color(0.1, 0.12, 0.15, 1)
+
+[node name="Rack1LED" type="ColorRect" parent="."]
+offset_left = 86.0
+offset_top = 56.0
+offset_right = 92.0
+offset_bottom = 60.0
+color = Color(0.0, 0.85, 0.0, 1)
+
+[node name="OldTRS" type="ColorRect" parent="."]
+offset_left = 200.0
+offset_top = 70.0
+offset_right = 260.0
+offset_bottom = 130.0
+color = Color(0.65, 0.55, 0.45, 1)
+
+[node name="OldTRSScreen" type="ColorRect" parent="."]
+offset_left = 210.0
+offset_top = 80.0
+offset_right = 250.0
+offset_bottom = 110.0
+color = Color(0.05, 0.5, 0.05, 1)
+
+[node name="OldTRSLabel" type="Label" parent="."]
+offset_left = 196.0
+offset_top = 132.0
+offset_right = 264.0
+offset_bottom = 146.0
+text = "TRS-80"
+horizontal_alignment = 1
+
+[node name="FilingCabinet" type="ColorRect" parent="."]
+offset_left = 320.0
+offset_top = 50.0
+offset_right = 380.0
+offset_bottom = 170.0
+color = Color(0.55, 0.5, 0.4, 1)
+
+[node name="FilingLabel" type="Label" parent="."]
+offset_left = 320.0
+offset_top = 100.0
+offset_right = 380.0
+offset_bottom = 114.0
+text = "files"
+horizontal_alignment = 1
+
+[node name="Sign" type="Label" parent="."]
+offset_left = 80.0
+offset_top = 8.0
+offset_right = 400.0
+offset_bottom = 24.0
+text = "IT ROOM - HUSH"
+horizontal_alignment = 1
+
+[node name="TRSSecret" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(230, 100)
+script = ExtResource("5_secret")
+secret_id = &"hospital_trs80_triage"
+display_name = "Vintage TRS-80"
+lore_text = "A sticky note: 'ER TRIAGE SYSTEM 1987 - DO NOT UNPLUG.' The screen shows a green prompt. The original BASIC code keeps running, untouched. Whatever else burns down today, this won't."
+prompt = "[E] Examine the TRS-80"
+
+[node name="TRSShape" type="CollisionShape2D" parent="TRSSecret"]
+shape = SubResource("shape_artifact")
+
+[node name="ChartSecret" type="Area2D" parent="." groups=["hotspots"]]
+position = Vector2(350, 175)
+script = ExtResource("5_secret")
+secret_id = &"hospital_misfiled_chart"
+display_name = "Paper chart from 1995"
+lore_text = "Misfiled in the wrong cabinet. Patient initials, a diagnosis, and a 'RESTRICTED' stamp. Retention should have shredded it ten years ago. Someone forgot. Someone always forgets."
+prompt = "[E] Read the misfiled chart"
+
+[node name="ChartShape" type="CollisionShape2D" parent="ChartSecret"]
+shape = SubResource("shape_artifact2")
+
+[node name="ChartIcon" type="ColorRect" parent="."]
+offset_left = 340.0
+offset_top = 168.0
+offset_right = 360.0
+offset_bottom = 182.0
+color = Color(0.92, 0.88, 0.7, 1)
+
+[node name="NurseDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(40, 220)
+target_location = &"site_hospital_nurse"
+target_spawn = &"from_server"
+prompt = "[E] Back to the wards"
+
+[node name="DoorLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 232.0
+offset_right = 64.0
+offset_bottom = 244.0
+text = "exit"
+horizontal_alignment = 1
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+script = ExtResource("4_spawn")
+id = &"default"
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(80, 220)

@@ -6,7 +6,7 @@ extends Node
 
 const SCREENSHOT_DIR: String = "user://playthrough/"
 const NEAR_THRESHOLD: float = 6.0
-const FRAME_TIMEOUT_SECS: float = 8.0
+const FRAME_TIMEOUT_SECS: float = 16.0
 
 var _enabled: bool = false
 var _shot_index: int = 0
@@ -121,6 +121,86 @@ func _run() -> void:
 	await _interact_step(Vector2(240, 130), "WhiteVan", "acme_white_van")
 	_check("darklock heat raised by van", HeatManager.get_heat(&"darklock") > 0.0)
 	_check("van rumor recorded", JournalManager.get_rumors_heard().has(&"acme_alley_van"))
+	var heat_after_acme: float = HeatManager.get_heat(&"darklock")
+
+	# Out of Acme via alley -> cubes -> lobby -> street.
+	await _door_step(Vector2(40, 230), "CubesDoor", &"site_acme_cubes", "")
+	await _door_step(Vector2(40, 220), "LobbyDoor", &"site_acme_lobby", "")
+	await _door_step(Vector2(40, 220), "StreetDoor", &"street_downtown", "back_on_street")
+
+	# Walk further down the block to the hospital.
+	await _door_step(Vector2(1120, 178), "HospitalDoor", &"site_hospital_lobby", "hospital_lobby")
+
+	# Marcie is back. Verify the recurring-NPC promise: same npc_id, fresh
+	# dialogue, journal still has only one entry for her.
+	await _interact_step(Vector2(240, 130), "Marcie", "hospital_marcie_returns")
+	_check(
+		"marcie still recorded as RECURRING after second meet",
+		JournalManager.get_npcs_met().get(&"marcie_rivera", {}).get("archetype", "") == "RECURRING"
+	)
+	_check(
+		"marcie's last_line updated to hospital opener",
+		String(JournalManager.get_npcs_met().get(&"marcie_rivera", {}).get("last_line", "")).begins_with("You. Of course")
+	)
+
+	# HIPAA trophy in lobby.
+	await _interact_step(Vector2(370, 60), "Plaque", "hospital_hipaa_trophy")
+	_check("hipaa trophy found", JournalManager.has_found_secret(&"hospital_hipaa_trophy"))
+
+	# Into the wards. Meet Dr. Patel and Shawn.
+	await _door_step(Vector2(440, 220), "NurseDoor", &"site_hospital_nurse", "hospital_nurse")
+
+	await _interact_step(Vector2(220, 130), "DrPatel", "hospital_dr_patel")
+	_check(
+		"dr patel recorded as RECURRING",
+		JournalManager.get_npcs_met().get(&"asha_patel", {}).get("archetype", "") == "RECURRING"
+	)
+
+	await _interact_step(Vector2(420, 140), "Shawn", "hospital_shawn")
+	_check(
+		"shawn recorded as FLAVOR",
+		JournalManager.get_npcs_met().get(&"shawn_it", {}).get("archetype", "") == "FLAVOR"
+	)
+
+	await _interact_step(Vector2(360, 35), "Clipboard", "hospital_clipboard")
+	_check("paper census secret found", JournalManager.has_found_secret(&"hospital_paper_census"))
+
+	# IT room secrets.
+	await _door_step(Vector2(320, 220), "ServerDoor", &"site_hospital_server", "hospital_server")
+
+	await _interact_step(Vector2(230, 100), "TRSSecret", "hospital_trs80")
+	_check("trs-80 secret found", JournalManager.has_found_secret(&"hospital_trs80_triage"))
+
+	await _interact_step(Vector2(350, 175), "ChartSecret", "hospital_chart")
+	_check("misfiled chart found", JournalManager.has_found_secret(&"hospital_misfiled_chart"))
+
+	# Back to wards, then the parking lot for the surveillance escalation.
+	await _door_step(Vector2(40, 220), "NurseDoor", &"site_hospital_nurse", "")
+	await _door_step(Vector2(600, 220), "ParkingDoor", &"site_hospital_parking", "hospital_parking")
+
+	await _interact_step(Vector2(120, 200), "Chaplain", "hospital_chaplain")
+	_check(
+		"chaplain recorded as SECRET",
+		JournalManager.get_npcs_met().get(&"hospital_chaplain", {}).get("archetype", "") == "SECRET"
+	)
+
+	await _interact_step(Vector2(380, 235), "Devon", "hospital_devon")
+	_check(
+		"devon recorded as FACTION",
+		JournalManager.get_npcs_met().get(&"darklock_devon", {}).get("archetype", "") == "FACTION"
+	)
+	_check(
+		"darklock standing increased by devon",
+		JournalManager.get_faction_standing(&"darklock") >= 2
+	)
+
+	# White SUV — heat should be strictly higher than after Acme van.
+	await _interact_step(Vector2(240, 130), "WhiteSUV", "hospital_white_suv")
+	_check("suv rumor recorded", JournalManager.get_rumors_heard().has(&"hospital_parking_suv"))
+	_check(
+		"darklock heat escalated past acme baseline",
+		HeatManager.get_heat(&"darklock") > heat_after_acme
+	)
 
 	# Open the journal as the final visual; flip through the tabs.
 	await _press_journal()
